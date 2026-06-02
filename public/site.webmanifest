@@ -1,0 +1,17 @@
+{
+  "name": "Super Sudoku",
+  "short_name": "Super Sudoku",
+  "description": "Play free Sudoku online and on Android.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061229",
+  "theme_color": "#061229",
+  "icons": [
+    {
+      "src": "/images/ic_launcher-playstore.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
