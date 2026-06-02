@@ -4,6 +4,13 @@
     "cleanUrls": true,
     "trailingSlash": true,
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      {
+        "source": "/privacy-policy.html",
+        "destination": "/privacy-policy/",
+        "type": 301
+      }
+    ],
     "rewrites": [],
     "headers": [
       {
