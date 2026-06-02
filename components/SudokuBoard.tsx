@@ -238,14 +238,14 @@ export default function SudokuBoard() {
 
   if (puzzle.length !== 81) {
     return (
-      <div className="glass grid aspect-square w-full max-w-[520px] place-items-center">
+      <div className="glass grid aspect-square w-full max-w-[390px] place-items-center">
         <span className="animate-pulse text-brand-50/50">Loading puzzle…</span>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[560px]">
+    <div className="mx-auto w-full max-w-[420px]">
       {/* Status bar */}
       <div className="mb-3 flex items-center justify-between gap-2 text-sm">
         <select

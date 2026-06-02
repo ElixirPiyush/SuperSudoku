@@ -38,9 +38,9 @@ export default function PlayPage() {
         </div>
       </section>
 
-      <section className="py-10">
-        <div className="container-page grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="glass p-4 sm:p-6">
+      <section className="pb-12 pt-6">
+        <div className="container-page grid items-start gap-8 lg:grid-cols-[auto_320px] lg:justify-center">
+          <div className="glass p-3 sm:p-4">
             <SudokuBoard />
           </div>
 
