@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X, Star } from "lucide-react";
 import { SITE } from "@/lib/site";
 import GooglePlayBadge from "./GooglePlayBadge";
+import AppIcon from "./AppIcon";
 
 const DISMISS_KEY = "supersudoku.web.installPromptDismissed";
 const WIN_THRESHOLD = 2; // show after the 2nd completed game
@@ -49,12 +50,7 @@ export default function InstallPromptModal() {
         >
           <X size={20} />
         </button>
-        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-brand-gradient text-ink shadow-glow">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-            <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke="currentColor" strokeWidth="1.4" />
-          </svg>
-        </div>
+        <AppIcon size={64} className="mx-auto mb-4 shadow-glow" />
         <h2 id="install-title" className="text-2xl font-bold text-white">
           Loving the puzzles?
         </h2>

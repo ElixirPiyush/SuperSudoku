@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Play } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site";
+import AppIcon from "./AppIcon";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -34,12 +35,7 @@ export default function Navbar() {
     >
       <nav className="container-page flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-display">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-gradient text-ink shadow-glow-sm">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-              <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke="currentColor" strokeWidth="1.4" />
-            </svg>
-          </span>
+          <AppIcon size={36} className="shadow-glow-sm" />
           <span className="text-lg font-bold tracking-tight">
             Super<span className="gradient-text">Sudoku</span>
           </span>

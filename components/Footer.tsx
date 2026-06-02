@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mail } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site";
 import GooglePlayBadge from "./GooglePlayBadge";
+import AppIcon from "./AppIcon";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -10,12 +11,7 @@ export default function Footer() {
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-gradient text-ink">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-                <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke="currentColor" strokeWidth="1.4" />
-              </svg>
-            </span>
+            <AppIcon size={36} />
             <span className="text-lg font-bold">
               Super<span className="gradient-text">Sudoku</span>
             </span>
