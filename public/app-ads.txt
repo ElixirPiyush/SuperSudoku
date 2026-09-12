@@ -1,1 +1,14 @@
+# Authorised digital sellers for Elixir Infotech apps.
+# Spec: https://iabtechlab.com/ads-txt/
+# Served at https://elixir-7482e.web.app/app-ads.txt, which is the developer
+# website declared on the Google Play listings. Crawlers re-read this roughly
+# every 24h, so a new line is not live to buyers the moment it is deployed.
+
+# Google AdMob - the publisher account every app requests ads through.
 google.com, pub-9596814292921203, DIRECT, f08c47fec0942fa0
+
+# Meta Audience Network, reached through AdMob mediation.
+# The ID is the Meta Business Manager (business portfolio) ID for Elixir
+# Infotech; Meta authorises Audience Network demand as a RESELLER, not DIRECT.
+# c3e20eee3f780d68 is Meta's certification authority ID.
+facebook.com, 925917363099969, RESELLER, c3e20eee3f780d68
