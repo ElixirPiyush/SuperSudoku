@@ -1,0 +1,3 @@
+# Rendered assets are regenerated from the generator (npm run all)
+output/
+generator/node_modules/

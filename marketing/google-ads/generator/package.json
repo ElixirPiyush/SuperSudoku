@@ -1,0 +1,16 @@
+{
+  "name": "super-sudoku-google-ads",
+  "private": true,
+  "description": "Generator for the Super Sudoku Google Ads creative package (images, videos, text assets).",
+  "scripts": {
+    "images": "node render-images.js",
+    "videos": "node render-videos.js",
+    "text": "node text-assets.js",
+    "qc": "node qc-videos.js && node gallery.js",
+    "gallery": "node gallery.js",
+    "all": "node text-assets.js && node render-images.js && node render-videos.js && node qc-videos.js && node gallery.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
