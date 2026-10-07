@@ -14,7 +14,8 @@ const CONCEPTS = [["main", "Main install"], ["daily_challenge", "Daily Challenge
 const FMTS = ["16x9", "1x1", "9x16", "191x1", "4x5"];
 
 let body = "";
-for (const [lang, L] of Object.entries(LANGS)) {
+const DONE = Object.entries(LANGS).filter(([l]) => fs.existsSync(path.join(OUT, "images", l)));
+for (const [lang, L] of DONE) {
   body += `<section id="${lang}"><h2>${esc(L.name)} <small>${lang}</small></h2>`;
   for (const [c, label] of CONCEPTS) {
     body += `<h3>${label}</h3><div class="row">`;
@@ -52,6 +53,6 @@ figure{margin:0;background:var(--card);border:1px solid var(--line);border-radiu
 figure img,figure video{display:block;height:200px;border-radius:6px} .f9x16 img{height:260px} .v9x16 video{height:320px} .v16x9 video{height:200px}
 figcaption{font-size:12px;color:var(--muted);margin-top:4px} .ok{color:#16a34a} .bad{color:#dc2626}
 table{border-collapse:collapse;width:100%;background:var(--card)} td,th{border:1px solid var(--line);padding:6px 8px;text-align:start;vertical-align:top} td i{color:var(--muted);font-size:11px}
-</style></head><body><header><h1>Super Sudoku — Google Ads creative package</h1><nav>${Object.entries(LANGS).map(([l, L]) => `<a href="#${l}">${esc(L.name)}</a>`).join("")}</nav></header><main>${body}</main></body></html>`;
+</style></head><body><header><h1>Super Sudoku — Google Ads creative package</h1><nav>${DONE.map(([l, L]) => `<a href="#${l}">${esc(L.name)}</a>`).join("")}</nav></header><main>${body}</main></body></html>`;
 fs.writeFileSync(path.join(OUT, "index.html"), html);
 console.log("gallery -> " + path.join(OUT, "index.html"));

@@ -112,8 +112,28 @@ const SPEC = {
   expert: { seed: 404, givens: 24 },
 };
 
+// The board from the real app screenshot (assets/app/game.png), Easy level.
+// Index 1 holds the player's own "3" (blue in the app), so it is not a given.
+const REAL = "73..46129 21.3..468 4.61.975. ..3.948.. 15.638.74 ....71.3. 8....35.2 591462387 3..9..64.";
+
+function solve(g) {
+  const s = [...g];
+  (function f() {
+    const i = s.indexOf(0);
+    if (i < 0) return true;
+    for (let v = 1; v <= 9; v++) if (canPlace(s, i, v)) { s[i] = v; if (f()) return true; s[i] = 0; }
+    return false;
+  })();
+  return s;
+}
+
 function buildPuzzles() {
   const out = {};
+  const real = REAL.replace(/ /g, "").split("").map((c) => (c === "." ? 0 : +c));
+  const realPuzzle = [...real];
+  realPuzzle[1] = 0;
+  out.real = { puzzle: realPuzzle, solution: solve(real), shown: real };
+  verify(out.real, "real");
   for (const [name, { seed, givens }] of Object.entries(SPEC)) {
     out[name] = generate(seed, givens);
     verify(out[name], name);

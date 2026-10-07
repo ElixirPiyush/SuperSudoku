@@ -8,15 +8,15 @@ variants.
 
 | | Count | Location |
 |---|---|---|
-| Static images (5 concepts × 5 formats × 12 languages) | 300 | `output/images/<lang>/` |
-| Video ads (15s + 30s × 9:16 + 16:9 × 12 languages) | 48 | `output/videos/<lang>/` |
+| Static images, English (5 concepts × 5 formats) | 25 | `output/images/en/` |
+| Video ads, English (15s + 30s × 9:16 + 16:9) | 4 | `output/videos/en/` |
 | Text assets (5 headlines + 5 descriptions × 12 languages) | 120 | `output/text_assets.csv` |
 | QC reports | 2 | `output/qc-images.json`, `output/qc-videos.json` |
 | Generator (re-render everything from source) | | `generator/` |
 
-> ⚠️ **Before launch, please read [Things to verify](#things-to-verify-before-launch).**
-> The in-phone game screen is a high-fidelity *recreation*, not a capture of
-> the real app. Google's policies require that ads represent the app accurately.
+> **Status:** the English set is final and uses the real app UI from the current
+> screenshots in `generator/assets/app/`. The other 11 languages are set up in
+> the copy deck and render with the same command once the English set is approved.
 
 ---
 
@@ -27,33 +27,35 @@ every day (the **Daily Challenge**).
 
 **Visual system** (one campaign, not twelve):
 
-- **The Sudoku board is the hero.** Every asset centres on a realistic Android
-  phone running Super Sudoku, with large, sharp digits, a highlighted selected
-  cell, row/column/box highlighting, same-number highlighting and the number pad.
-- **Colours:** the app's own *Neon Pulse* theme (`#061229` navy, `#4FC3F7`
-  cyan) on a bright, deep-blue gradient with a luminous glow behind the device.
-  **Gold** (taken from the launcher icon) is used only for the CTA and a few
-  accent tiles, so the CTA is always the warmest thing on screen.
-- **Decoration** is restrained: 2–5 floating number tiles, a calendar for
-  Daily Challenge, a faint oversized grid for the brain concept. There are no
-  coins, gems, characters, casino effects, ratings, reviews or download counts.
-- **Typography:** Poppins (the brand font, as used on the website) for Latin
-  scripts, the brand name and every digit. Each Indic script and Arabic uses a
-  dedicated, highly legible face (see §6).
-- **Every grid shown is a real, valid Sudoku.** Puzzles are generated with
-  fixed seeds and verified at build time: the solution is valid, the givens
-  agree with it, and the puzzle has exactly one solution. Every digit the
-  "player" enters (in images and videos) comes from that solution, and
-  pencil-mark notes are the cell's true candidates.
+- **The real app is the hero.** Every asset centres on a realistic Android
+  phone showing the current Super Sudoku UI:
+  - **Game screen:** a 1:1 recreation of `assets/app/game.png`, including the
+    "Sudoku" header, Easy/Mistakes/timer row, board, Undo/Erase/Hint/Notes and
+    the number pad with remaining counts. It is pixel-diffed against the
+    screenshot and differs only by anti-aliasing. Recreating it lets the ads
+    show a selected cell and real moves on **your actual board**.
+  - **Home screen, Daily result, Quick Play cards, October calendar, icon:**
+    these are the real screenshots and crops from them, unaltered.
+- **Colours:** the app's own cobalt blue (`#0B45DA`, as on the "Play Sudoku"
+  card), white app surfaces and the gold of "DAILY **CHALLENGE**" for CTAs. The
+  white phone screen on saturated blue gives the board maximum contrast.
+- **Decoration** is restrained: 1–5 floating number tiles, the real calendar
+  card, the real Quick Play cards, and a faint oversized grid for the brain
+  concept. There are no coins, characters, casino effects, fake ratings, fake
+  reviews or download counts.
+- **Every grid is a real Sudoku.** The main board is the exact puzzle from your
+  screenshot, which has a unique solution (verified). Every digit the "player"
+  enters comes from that solution, and pencil notes are true candidates. The
+  other boards are seeded, verified unique-solution puzzles.
 
 ## 2. Image concepts
 
 | # | Concept (file key) | Headline (EN) | Supporting (EN) | CTA (EN) | Visual |
 |---|---|---|---|---|---|
-| 1 | Main install (`main`) | Challenge Your Mind | Play Sudoku anytime | Play Now | Phone mid-game, cell selected, same-number highlight |
-| 2 | Daily Challenge (`daily_challenge`) | New Challenge Every Day | Can you solve today's puzzle? | Play Today's Challenge | Daily Challenge screen + "Today" calendar |
-| 3 | Brain / puzzle (`brain_challenge`) | Train Your Brain | Think. Solve. Master Sudoku. | Start Playing | Notes mode with real candidates, oversized grid, number tiles |
-| 4 | Difficulty (`difficulty`) | Choose Your Challenge | From beginner to expert | Start Solving | Easy → Medium → Hard → Expert cards (fewer givens per level) + Expert game |
+| 1 | Main install (`main`) | Challenge Your Mind | Play Sudoku anytime | Play Now | Your real board, next move entered, matching 5s highlighted |
+| 2 | Daily Challenge (`daily_challenge`) | New Challenge Every Day | Can you solve today's puzzle? | Play Today's Challenge | Real home screen (Daily Challenge card) + real October calendar with today marked |
+| 3 | Brain / puzzle (`brain_challenge`) | Train Your Brain | Think. Solve. Master Sudoku. | Start Playing | Notes mode with true candidates, oversized grid, number tiles |
+| 4 | Difficulty (`difficulty`) | Choose Your Challenge | From beginner to expert | Start Solving | Real Quick Play cards Easy → Medium → Hard → Expert + Expert game |
 | 5 | Minimal premium (`minimal`) | How Fast Can You Solve It? | – | Play Now | Large phone, halo ring, timer chip |
 
 "Train Your Brain" is framed as entertainment. No medical or scientific
@@ -90,27 +92,24 @@ music-licensing issues.
 
 | Time | Picture | On-screen text (EN) |
 |---|---|---|
-| 0–3s | Phone eases in on a clean, in-progress board | Love Sudoku? |
+| 0–3s | Phone eases in on the real game screen (your board) | Love Sudoku? |
 | 3–6s | 3 real moves: tap cell → tap number → digit pops in; subtle push-in | Challenge Your Mind |
-| 6–10s | Cut to the Daily Challenge screen, "Today" calendar pops; 2 moves | A New Challenge Every Day |
-| 10–13s | Near-complete daily board → last 3 moves → gold wave across the grid → trophy card | Can You Solve It? |
+| 6–9s | Real home screen; push in on the Daily Challenge card; the real calendar floats in; "Continue Today's Challenge" is highlighted and tapped | A New Challenge Every Day |
+| 9–12s | Daily puzzle (Medium): last moves → gold wave across the completed grid | Can You Solve It? |
+| 12–13s | Real "Daily result" dialog | (caption continues) |
 | 13–15s | End card: app icon, title, CTA (gentle pulse), availability line | Play Super Sudoku · **Install Now** |
 
 ### Video B: 30 seconds (`video_30s`)
 
 | Time | Picture | On-screen text (EN) |
 |---|---|---|
-| 0–4s | Hook: macro close-up on an Expert board, slow push | Think You Can Solve This? |
-| 4–9s | Pull out to the full phone; 4 moves of real gameplay | (brand lockup only) |
-| 9–14s | Close-up on board + number pad: Notes on → 2–3 true candidates pencilled → Notes off → cell solved → another move | – |
-| 14–19s | Easy → Medium → Hard → Expert: level cards highlight in turn while the phone's board changes density | Easy • Medium • Hard • Expert (active word lights up gold) |
-| 19–24s | Daily Challenge screen + calendar; 2 moves | New Challenge Every Day |
-| 24–27s | Final moves → gold completion wave → trophy card | Solved! |
+| 0–4s | Hook: macro close-up on your board, slow push | Think You Can Solve This? |
+| 4–9s | Pull out; 4 real moves | (brand lockup) |
+| 9–14s | Close-up on board + pad: Notes on → true candidates pencilled → Notes off → cell solved → another move | – |
+| 14–19s | Real home screen, Quick Play row: Easy → Medium → Hard → Expert highlighted and tapped in turn | Easy • Medium • Hard • Expert (active word turns gold) |
+| 19–24s | Daily Challenge card + real calendar → tap Continue → daily puzzle moves | New Challenge Every Day |
+| 24–27s | Final moves → gold completion wave → real "Daily result" dialog | Solved! |
 | 27–30s | End card | Play Super Sudoku · **Install Now** |
-
-The motion is smooth eased camera moves, short dips between screens and
-subtle floating tiles. There are no flashes or aggressive transitions. Every
-interaction is a legal move you could make in the game.
 
 ## 4. Localization
 
@@ -191,7 +190,7 @@ QC runs automatically on every render. The results are stored in
 | Text asset limits | ≤ 30 / ≤ 90 characters, validated per string |
 | No misleading claims | No ratings, reviews, download counts, prices or "#1" claims anywhere |
 
-Latest run: **300/300 images and 48/48 videos pass** (see the JSON reports).
+Latest run (English): **25/25 images and 4/4 videos pass** (see the JSON reports).
 
 ## 7. Suggested Google Ads setup
 
@@ -212,24 +211,15 @@ Latest run: **300/300 images and 48/48 videos pass** (see the JSON reports).
 
 ## 8. Things to verify before launch
 
-1. **In-app UI fidelity.** The source screenshots at
-   `D:\Projects\Backup\sudoku backup\...\screenshots_source\` and
-   `...\screenshots\phone\` are on your local machine and were **not
-   reachable** from the cloud environment where this package was produced. The
-   phone screen is instead a pixel-precise recreation built from this repo:
-   the *Neon Pulse* theme tokens (`tailwind.config.ts`), the web board
-   (`components/SudokuBoard.tsx`), the launcher icon and the documented
-   features. Compare it with the real app: if labels, icons or layout differ
-   (for example the tool row, the "Mistakes" counter, or the "Daily Challenge"
-   header), adjust `gameScreen()` in `generator/shared.js` and re-render.
-   Everything regenerates in one command.
-2. **Native-speaker review.** The copy was written natively per language, but
-   have a native speaker in each market proofread the 12 copy decks
-   (`generator/copy.js`, `generator/text-assets.js`) before spending. Pay particular
-   attention to the Indic languages and Arabic.
-3. **Feature claims.** The text assets mention offline play, themes, notes,
-   hints, undo and statistics, which are taken from the website's feature list.
-   Remove any line that doesn't match the current app build.
+1. **Selection styling.** Your screenshot shows no selected cell. The light-blue
+   selected cell and the row/column/box tint, the blue number pad while a cell
+   is selected, and the blue tap ripples follow common Sudoku conventions in
+   your app's palette. If the app styles selection differently, adjust
+   `.cell.sel/.peer/.same` and `.app.active .key` in `generator/shared.css`.
+2. **Dates in screenshots.** The real screens show "Oct 6, 2026" (home) and
+   "October 5, 2026" (Daily result). That's fine for an October launch. For
+   later flights, swap in fresh screenshots (same file names) and re-render.
+3. **Native-speaker review** of the other 11 languages before they launch.
 
 ## 9. Regenerating
 

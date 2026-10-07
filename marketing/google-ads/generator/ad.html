@@ -9,50 +9,8 @@
 <body>
 <div id="root"></div>
 <script>
-// Static ad compositions. renderAd(cfg) is driven by render-images.js.
-// cfg = { lang, dir, script, font, copy, concept, format, W, H, puzzles, fills }
-
-const FORMATS = {
-  "16x9": "land", "191x1": "land",
-  "1x1": "stack", "4x5": "stack", "9x16": "stack",
-};
-
-// In-phone game state per concept. UI text inside the phone is the app's own
-// UI and is identical in every market.
-function screenState(concept, P, fills) {
-  const base = (name) => ({ puzzle: P[name].puzzle, solution: P[name].solution });
-  const apply = (b, n) => {
-    const values = [...b.puzzle];
-    for (const i of fills[n]) values[i] = b.solution[i];
-    return values;
-  };
-  if (concept === "daily") {
-    const b = base("daily"), values = apply(b, "daily");
-    const sel = fills.daily[fills.daily.length - 1];
-    return { ...b, values, selected: sel, title: "Daily Challenge", titleIcon: "cal", chip: "Hard", time: "06:18", mistakes: 0, keyOn: values[sel] };
-  }
-  if (concept === "brain") {
-    const b = base("hard"), values = apply(b, "hard");
-    const notes = {};
-    const empties = values.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
-    for (const i of empties.filter((_, k) => k % 3 === 0).slice(0, 12)) notes[i] = candidates(values, i);
-    const sel = empties.find((i) => notes[i] && notes[i].length >= 2 && notes[i].length <= 4) ?? empties[0];
-    return { ...b, values, notes, selected: sel, notesOn: true, title: "Classic", chip: "Hard", time: "11:52", mistakes: 1 };
-  }
-  if (concept === "levels") {
-    const b = base("expert"), values = apply(b, "expert");
-    const sel = fills.expert[fills.expert.length - 1];
-    return { ...b, values, selected: sel, title: "Classic", chip: "Expert", time: "14:06", mistakes: 0, keyOn: values[sel] };
-  }
-  if (concept === "minimal") {
-    const b = base("medium"), values = apply(b, "medium");
-    const sel = fills.medium[fills.medium.length - 1];
-    return { ...b, values, selected: sel, title: "Classic", chip: "Medium", time: "03:47", mistakes: 0, keyOn: values[sel] };
-  }
-  const b = base("main"), values = apply(b, "main");
-  const sel = fills.main[fills.main.length - 1];
-  return { ...b, values, selected: sel, title: "Classic", chip: "Medium", time: "04:12", mistakes: 0, keyOn: values[sel] };
-}
+// Static ad compositions, driven by render-images.js via renderAd(cfg).
+const FORMATS = { "16x9": "land", "191x1": "land", "1x1": "stack", "4x5": "stack", "9x16": "stack" };
 
 function candidates(values, i) {
   const r = Math.floor(i / 9), c = i % 9, out = [];
@@ -60,219 +18,180 @@ function candidates(values, i) {
     let ok = true;
     for (let k = 0; k < 9 && ok; k++) {
       if (values[r * 9 + k] === v || values[k * 9 + c] === v) ok = false;
-      const br = r - (r % 3) + Math.floor(k / 3), bc = c - (c % 3) + (k % 3);
-      if (values[br * 9 + bc] === v) ok = false;
+      if (values[(r - (r % 3) + Math.floor(k / 3)) * 9 + c - (c % 3) + (k % 3)] === v) ok = false;
     }
     if (ok) out.push(v);
   }
   return out;
 }
 
-// Decorative tiles, positioned relative to the phone box (fractions of pw/ph).
-// d = digit, k = style, s = size in u, fx/fy = position relative to phone.
+// What the phone shows for each concept. Game screens are the real board from
+// the app screenshot (or verified generated boards); the home screen is the
+// real screenshot. `cb` = y (screenshot px incl. status bar) where the content
+// that must stay visible ends.
+function screenFor(concept, P, F) {
+  const real = P.real;
+  if (concept === "daily") return { html: shotScreen("home"), cb: 1150 };
+  if (concept === "brain") {
+    const p = P.hard, values = [...p.puzzle];
+    for (const i of F.hard) values[i] = p.solution[i];
+    const empties = values.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
+    const notes = {};
+    for (const i of empties.filter((_, k) => k % 2 === 0).slice(0, 14)) notes[i] = candidates(values, i);
+    const sel = empties.find((i) => notes[i] && notes[i].length >= 2 && notes[i].length <= 3) ?? empties[0];
+    return { html: gameScreen({ level: "Hard", time: "11:52", mistakes: 1, puzzle: p.puzzle, values, notes, selected: sel, notesOn: true }), cb: 1277 };
+  }
+  if (concept === "levels") {
+    const p = P.expert, values = [...p.puzzle];
+    for (const i of F.expert) values[i] = p.solution[i];
+    const sel = F.expert[F.expert.length - 1];
+    return { html: gameScreen({ level: "Expert", time: "14:06", mistakes: 0, puzzle: p.puzzle, values, selected: sel, keyOn: values[sel] }), cb: 1277 };
+  }
+  // main + minimal: the real board, one step further than the screenshot.
+  const values = [...real.shown];
+  values[2] = real.solution[2];
+  if (concept === "minimal") values[11] = real.solution[11];
+  const sel = concept === "minimal" ? 11 : 2;
+  return { html: gameScreen({ level: "Easy", time: concept === "minimal" ? "03:47" : "04:58", mistakes: 0, puzzle: real.puzzle, values, selected: sel, keyOn: values[sel] }), cb: 1277 };
+}
+
 const TILES = {
-  main: [
-    { d: 7, k: "gold", s: 9, fx: -0.32, fy: 0.12, r: -10 },
-    { d: 3, k: "", s: 7, fx: 1.08, fy: 0.06, r: 8 },
-    { d: 9, k: "blue", s: 8, fx: 1.14, fy: 0.62, r: 10 },
-  ],
-  daily: [
-    { d: 4, k: "", s: 7, fx: -0.3, fy: 0.3, r: -9 },
-    { d: 8, k: "blue", s: 8, fx: 1.12, fy: 0.62, r: -8 },
-  ],
-  brain: [
-    { d: 6, k: "gold", s: 9, fx: -0.34, fy: 0.08, r: -12 },
-    { d: 1, k: "", s: 7, fx: 1.12, fy: 0.04, r: 10 },
-    { d: 8, k: "blue", s: 8.5, fx: 1.16, fy: 0.42, r: -8 },
-    { d: 4, k: "", s: 6.5, fx: -0.3, fy: 0.5, r: 8 },
-    { d: 2, k: "", s: 6, fx: 1.06, fy: 0.8, r: 12 },
-  ],
-  levels: [
-    { d: 1, k: "", s: 6.5, fx: 1.1, fy: 0.08, r: 8 },
-    { d: 9, k: "gold", s: 7.5, fx: -0.28, fy: 0.1, r: -10 },
-  ],
+  main: [{ d: 5, k: "gold", s: 9, fx: -0.32, fy: 0.12, r: -10 }, { d: 3, k: "", s: 7, fx: 1.08, fy: 0.06, r: 8 }, { d: 9, k: "blue", s: 8, fx: 1.14, fy: 0.6, r: 10 }],
+  daily: [{ d: 7, k: "", s: 7, fx: 1.1, fy: 0.68, r: -9 }],
+  brain: [{ d: 6, k: "gold", s: 9, fx: -0.34, fy: 0.08, r: -12 }, { d: 1, k: "", s: 7, fx: 1.12, fy: 0.04, r: 10 }, { d: 8, k: "blue", s: 8.5, fx: 1.16, fy: 0.42, r: -8 }, { d: 4, k: "", s: 6.5, fx: -0.3, fy: 0.5, r: 8 }, { d: 2, k: "", s: 6, fx: 1.06, fy: 0.8, r: 12 }],
+  levels: [{ d: 9, k: "gold", s: 7.5, fx: 1.1, fy: 0.1, r: 10 }],
   minimal: [],
 };
-
-// Phone geometry: board bottom sits at phone.y + BOARD_K * pw (measured once).
-let BOARD_K = null;
 
 function renderAd(cfg) {
   const { W, H, copy, concept, format, dir } = cfg;
   const layout = FORMATS[format];
   const rtl = dir === "rtl";
   const u = Math.min(W, H) / 100;
-  const st = screenState(concept, cfg.puzzles, cfg.fills);
   const c = copy[concept];
+  const scr = screenFor(concept, cfg.puzzles, cfg.fills);
   const root = document.getElementById("root");
   const scriptCls = cfg.script === "latin" ? "lat" : cfg.script === "arab" ? "ar" : "cx";
   root.innerHTML = `<div class="canvas ${scriptCls}" dir="${dir}" lang="${cfg.lang}" style="--W:${W}px;--H:${H}px;--u:${u}px">
-    <div class="bg" id="bg"><div class="grain"></div></div>
-    <div id="deco"></div><div id="hero"></div><div id="text"></div></div>`;
+    <div class="bg"><div class="grid"></div></div><div id="deco"></div><div id="hero"></div><div id="text"></div></div>`;
   const canvas = root.firstElementChild;
   canvas.style.fontFamily = cfg.font;
   const $ = (id) => canvas.querySelector("#" + id);
   const text = $("text"), hero = $("hero"), deco = $("deco");
   const mirror = (x, w) => (rtl ? W - x - w : x);
-  const align = rtl ? "right" : "left";
   const lh = scriptCls === "lat" ? 1.08 : 1.34;
+  // y of the must-see content bottom, as a multiple of phone width
+  const contentK = 0.034 + (2.007 - 0.068) * (scr.cb / 2070);
 
-  const boardK = () => {
-    if (BOARD_K == null) {
-      hero.innerHTML = phone(gameScreen(st), { pw: 400, x: 0, y: 0 });
-      BOARD_K = (hero.querySelector(".board").getBoundingClientRect().bottom - hero.querySelector(".phone").getBoundingClientRect().top) / 400;
-    }
-    return BOARD_K;
-  };
-
-  let phoneBox;
+  let box;
   if (layout === "land") {
-    // ------------------------------------------------ landscape: text | phone
-    const mx = 8 * u, my = 8 * u;
-    const minimal = concept === "minimal";
-    const pw = (minimal ? 47 : 41) * u, ph = pw * 2.06;
+    const mx = 8 * u, my = 8 * u, minimal = concept === "minimal";
+    const pw = (minimal ? 47 : 41.5) * u, ph = pw * PHONE_RATIO;
     const pcx = W * (minimal ? 0.72 : 0.735);
-    const px = mirror(pcx - pw / 2, pw), py = minimal ? 9 * u : (H - ph) / 2;
-    phoneBox = { x: px, y: py, w: pw, h: ph };
+    box = { x: mirror(pcx - pw / 2, pw), y: minimal ? 9 * u : (H - ph) / 2, w: pw, h: ph };
     const colW = W * 0.5 - mx;
-    const tx = mirror(mx, colW);
     const hStart = concept === "levels" ? 8.2 : minimal ? 10.5 : 9.6;
-    text.style.cssText = `position:absolute;left:${tx}px;top:${my}px;width:${colW}px;height:${H - 2 * my}px;display:flex;flex-direction:column;justify-content:center;align-items:${rtl ? "flex-end" : "flex-start"};text-align:${align};`;
+    text.style.cssText = `position:absolute;left:${mirror(mx, colW)}px;top:${my}px;width:${colW}px;height:${H - 2 * my}px;display:flex;flex-direction:column;justify-content:center;align-items:${rtl ? "flex-end" : "flex-start"};text-align:${rtl ? "right" : "left"};z-index:20`;
     text.innerHTML = `${lockup(3.9 * u)}
       <div class="h" id="h" style="margin-top:${5.5 * u}px;width:100%"></div>
-      ${c.s ? `<div class="s" id="s" style="margin-top:${2.4 * u}px;width:100%;font-size:${3.9 * u}px"></div>` : ""}
-      ${concept === "levels" ? `<div id="lv" style="margin-top:${4 * u}px">${levelRow(cfg.copy.lv, cfg.puzzles, 2.05 * u)}</div>` : ""}
-      <div id="ctaWrap" style="margin-top:${(concept === "levels" ? 4.5 : 6) * u}px">${cta(c.cta, 3.6 * u)}</div>
-      <div class="avail" id="av" style="margin-top:${2.6 * u}px;font-size:${2.5 * u}px">${cfg.copy.available}</div>`;
+      ${c.s ? `<div class="s" id="s" style="margin-top:${2.4 * u}px;width:100%"></div>` : ""}
+      ${concept === "levels" ? `<div id="lv" style="margin-top:${4 * u}px">${levelRow(10 * u)}</div>` : ""}
+      <div style="margin-top:${(concept === "levels" ? 4.5 : 6) * u}px">${cta(c.cta, 3.6 * u)}</div>
+      <div style="margin-top:${2.6 * u}px">${avail(cfg.copy.available, 2.5 * u)}</div>`;
     $("h").textContent = c.h;
     if (c.s) $("s").textContent = c.s;
     fitText($("h"), hStart * u, (concept === "levels" ? 2 : 3) * hStart * u * lh, 5 * u);
     if (c.s) fitText($("s"), 3.9 * u, 2 * 3.9 * u * 1.5, 2.6 * u);
     fitWidth(canvas.querySelector(".cta"), 3.6 * u, colW, 2.4 * u);
-    if (concept === "levels") fitWidth(canvas.querySelector(".lvlRow"), 2.05 * u, colW, 1.4 * u);
-    canvas.style.setProperty("--gx", (rtl ? (W - pcx) / W : pcx / W) * 100 + "%");
+    if (concept === "levels") { const r = canvas.querySelector(".lvRow"); let cw = 10 * u; while (r.getBoundingClientRect().width > colW && cw > 5 * u) { cw -= 2; r.outerHTML = levelRow(cw); } }
+    canvas.style.setProperty("--gx", (rtl ? 1 - pcx / W : pcx / W) * 100 + "%");
   } else {
-    // ------------------------------------------------ stacked: square / 4:5 / 9:16
-    const portrait = format === "9x16";
-    const tall = format === "4x5";
-    const mx = 7 * u;
-    const top = (portrait ? 8 : 5) * u;
-    const hStart = portrait ? 10 : tall ? 8.2 : 7.4;
-    const sSize = portrait ? 4.5 : 3.5;
-    const ctaSize = portrait ? 4.6 : tall ? 3.9 : 3.6;
-    const lf = (portrait ? 2.75 : tall ? 2.2 : 1.9) * u;
-    text.style.cssText = `position:absolute;left:${mx}px;top:${top}px;width:${W - 2 * mx}px;display:flex;flex-direction:column;align-items:center;text-align:center;`;
+    const portrait = format === "9x16", tall = format === "4x5";
+    const mx = 7 * u, top = (portrait ? 8 : 5) * u;
+    const hStart = portrait ? 10 : tall ? 8.2 : 7.4, sSize = portrait ? 4.5 : 3.5, ctaSize = portrait ? 4.6 : tall ? 3.9 : 3.6;
+    text.style.cssText = `position:absolute;left:${mx}px;top:${top}px;width:${W - 2 * mx}px;display:flex;flex-direction:column;align-items:center;text-align:center;z-index:20`;
     text.innerHTML = `${lockup((portrait ? 4.6 : 3.5) * u)}
       <div class="h" id="h" style="margin-top:${(portrait ? 6 : 3.4) * u}px;width:100%"></div>
-      ${c.s ? `<div class="s" id="s" style="margin-top:${(portrait ? 2.4 : 1.4) * u}px;width:100%"></div>` : ""}
-`;
+      ${c.s ? `<div class="s" id="s" style="margin-top:${(portrait ? 2.4 : 1.4) * u}px;width:100%"></div>` : ""}`;
     $("h").textContent = c.h;
     if (c.s) $("s").textContent = c.s;
     fitText($("h"), hStart * u, (portrait ? 3 : 2) * hStart * u * lh, 5 * u);
     if (c.s) fitText($("s"), sSize * u, (portrait ? 2 : 1) * sSize * u * 1.5, 2.6 * u);
     const textBottom = top + text.getBoundingClientRect().height;
-
-    // CTA block pinned near the bottom, over a fade so it never fights the UI.
     const ctaBlock = document.createElement("div");
-    const ctaBottom = portrait ? 11 * u : (tall ? 6 : 5) * u;
-    ctaBlock.style.cssText = `position:absolute;left:0;right:0;bottom:${ctaBottom}px;display:flex;flex-direction:column;align-items:center;z-index:20;`;
-    ctaBlock.innerHTML = `${cta(c.cta, ctaSize * u)}
-      ${portrait ? `<div class="avail" style="margin-top:${3 * u}px;font-size:${3.1 * u}px">${cfg.copy.available}</div>` : ""}`;
+    ctaBlock.style.cssText = `position:absolute;left:0;right:0;bottom:${(portrait ? 11 : tall ? 6 : 5) * u}px;display:flex;flex-direction:column;align-items:center;z-index:20;`;
+    ctaBlock.innerHTML = `${cta(c.cta, ctaSize * u)}${portrait ? `<div style="margin-top:${3 * u}px">${avail(cfg.copy.available, 3.1 * u)}</div>` : ""}`;
     canvas.appendChild(ctaBlock);
     fitWidth(ctaBlock.querySelector(".cta"), ctaSize * u, W - 2 * mx, 2.4 * u);
     const ctaTop = ctaBlock.getBoundingClientRect().top;
-
-    const minimal = concept === "minimal";
-    const gap = (portrait ? 5 : 3.2) * u;
-    const phoneTop = textBottom + gap;
-    // Largest phone whose whole board stays above the CTA; the rest of the
-    // device runs off the bottom edge behind the fade.
-    let pw = (ctaTop - 2.5 * u - phoneTop) / boardK();
-    const maxPw = (concept === "levels" ? (portrait ? 48 : tall ? 38 : 34) : portrait ? 62 : tall ? 46 : minimal ? 44 : 41) * u;
-    pw = Math.min(pw, maxPw);
-    const ph = pw * 2.06;
-    phoneBox = { x: (W - pw) / 2, y: phoneTop, w: pw, h: ph };
+    const phoneTop = textBottom + (portrait ? 5 : 3.2) * u;
+    let pw = (ctaTop - 2.5 * u - phoneTop) / contentK;
+    pw = Math.min(pw, (concept === "levels" ? (portrait ? 48 : tall ? 38 : 34) : portrait ? 62 : tall ? 46 : concept === "minimal" ? 44 : 41) * u);
+    box = { x: (W - pw) / 2, y: phoneTop, w: pw, h: pw * PHONE_RATIO, ctaTop };
     const fade = document.createElement("div");
     fade.className = "fade";
-    fade.style.top = Math.min(ctaTop - 6 * u, phoneTop + boardK() * pw + 1 * u) + "px";
+    fade.style.top = Math.min(ctaTop - 6 * u, phoneTop + contentK * pw + 1 * u) + "px";
     canvas.appendChild(fade);
-    phoneBox.ctaTop = ctaTop;
     if (concept === "levels") {
-      // Two level cards each side of the phone: Easy/Medium then Hard/Expert.
-      const keys = ["easy", "medium", "hard", "expert"];
-      const side = (W - pw) / 2 - 3 * u - 2.5 * u;
-      let html = "";
-      keys.forEach((k, i) => (html += `<div class="lvW" style="position:absolute;z-index:12">${levelCard(cfg.copy.lv[i], cfg.puzzles[k].puzzle, i + 1, lf, i === 3)}</div>`));
-      const holder = document.createElement("div");
-      holder.innerHTML = html;
-      canvas.appendChild(holder);
-      const cards = [...holder.querySelectorAll(".lvW")];
-      let f = lf;
-      const widest = () => Math.max(...cards.map((c) => c.getBoundingClientRect().width));
-      while (widest() > side && f > 1.2 * u) { f -= 0.5; cards.forEach((c) => (c.firstElementChild.style.fontSize = f + "px")); }
-      const ch = cards[0].getBoundingClientRect().height, gapY = 3 * u;
-      const y0 = phoneTop + Math.max(0, (Math.min(ctaTop - 3 * u, phoneTop + boardK() * pw) - phoneTop - (2 * ch + gapY)) / 2);
-      cards.forEach((c, i) => {
-        const w = c.getBoundingClientRect().width;
+      const side = (W - pw) / 2 - 5.5 * u;
+      const cw = Math.min(side, (portrait ? 19 : 15) * u), ch = cw * (230 / 210), gap = 3 * u;
+      const y0 = phoneTop + Math.max(0, (contentK * pw - (2 * ch + gap)) / 2);
+      [0, 1, 2, 3].forEach((i) => {
         const leftCol = i < 2 ? !rtl : rtl;
-        const x = leftCol ? (W - pw) / 2 - 3 * u - w : (W + pw) / 2 + 3 * u;
-        c.style.left = x + "px";
-        c.style.top = y0 + (i % 2) * (ch + gapY) + "px";
+        const x = leftCol ? (W - pw) / 2 - 3 * u - cw : (W + pw) / 2 + 3 * u;
+        canvas.insertAdjacentHTML("beforeend", `<img class="lvCard" style="--cw:${cw}px;position:absolute;z-index:12;left:${x}px;top:${y0 + (i % 2) * (ch + gap)}px" src="assets/app/qp_${i}.png">`);
       });
     }
     canvas.style.setProperty("--gx", "50%");
-    canvas.style.setProperty("--gy", ((phoneTop + ph * 0.3) / H) * 100 + "%");
+    canvas.style.setProperty("--gy", ((phoneTop + box.h * 0.3) / H) * 100 + "%");
   }
 
-  // ---------------------------------------------------------------- hero
-  hero.innerHTML = phone(gameScreen(st), { pw: phoneBox.w, x: phoneBox.x, y: phoneBox.y });
+  hero.innerHTML = phone(scr.html, { pw: box.w, x: box.x, y: box.y });
   let d = "";
   if (concept === "brain") {
-    const gs = layout === "land" ? phoneBox.h * 1.05 : phoneBox.w * 1.75;
-    const gcy = layout === "land" ? phoneBox.y + phoneBox.h * 0.42 : phoneBox.y + phoneBox.w * 0.95;
-    d += bigGrid(gs, phoneBox.x + phoneBox.w / 2 - gs / 2, gcy - gs / 2, -9);
+    const gs = layout === "land" ? box.h * 1.05 : box.w * 1.75;
+    const gcy = layout === "land" ? box.y + box.h * 0.42 : box.y + box.w * 0.95;
+    d += bigGrid(gs, box.x + box.w / 2 - gs / 2, gcy - gs / 2, -9);
   }
   if (concept === "minimal") {
-    // Luminous ring behind the device keeps the minimal ad premium.
-    const r = phoneBox.w * 0.9;
-    d += `<div style="position:absolute;left:${phoneBox.x + phoneBox.w / 2 - r}px;top:${phoneBox.y + phoneBox.w * 0.75 - r}px;width:${2 * r}px;height:${2 * r}px;border-radius:50%;border:${0.35 * u}px solid rgba(139,231,255,0.2);box-shadow:0 0 ${8 * u}px rgba(79,195,247,0.18), inset 0 0 ${8 * u}px rgba(79,195,247,0.12)"></div>`;
+    const r = box.w * 0.9;
+    d += `<div style="position:absolute;left:${box.x + box.w / 2 - r}px;top:${box.y + box.w * 0.75 - r}px;width:${2 * r}px;height:${2 * r}px;border-radius:50%;border:${0.35 * u}px solid rgba(255,255,255,0.22);box-shadow:0 0 ${8 * u}px rgba(160,200,255,0.3)"></div>`;
   }
-  const tileUnit = layout === "land" ? u : u * (format === "9x16" ? 1.25 : 1);
+  const tu = layout === "land" ? u : u * (format === "9x16" ? 1.25 : 1);
   for (const t of TILES[concept]) {
-    const s = t.s * tileUnit;
-    let fx = t.fx;
-    if (rtl) fx = 1 - fx - s / phoneBox.w;
-    const x = phoneBox.x + fx * phoneBox.w, y = phoneBox.y + t.fy * phoneBox.h;
-    if (layout === "land" && !rtl && x < W * 0.5) continue; // never collide with the copy
-    if (layout === "land" && rtl && x + s > W * 0.5) continue;
+    const s = t.s * tu;
+    const fx = rtl ? 1 - t.fx - s / box.w : t.fx;
+    const x = box.x + fx * box.w, y = box.y + t.fy * box.h;
+    if (layout === "land" && (rtl ? x + s > W * 0.5 : x < W * 0.5)) continue;
     if (x < 1.5 * u || x + s > W - 1.5 * u) continue;
-    if (layout !== "land" && (concept === "levels" || y + s > phoneBox.ctaTop - 4 * u)) continue;
+    if (layout !== "land" && (concept === "levels" || y + s > box.ctaTop - 4 * u)) continue;
     d += tile(t.d, { x, y, s, kind: t.k, rot: rtl ? -t.r : t.r });
   }
   deco.innerHTML = d;
 
   if (concept === "daily") {
-    // Calendar hangs off the phone's top corner, away from the copy.
-    const cw = (layout === "land" ? 16 : format === "9x16" ? 22 : 16) * u;
-    let cx = phoneBox.x + phoneBox.w - cw * 0.3, cy = phoneBox.y - cw * 0.12;
-    if (rtl) cx = phoneBox.x - cw * 0.7;
-    if (layout !== "land") cy = phoneBox.y + phoneBox.h * 0.02;
-    hero.insertAdjacentHTML("beforeend", calendar(cfg.copy.today, cw, cx, cy, rtl ? -8 : 8));
-    const calT = hero.querySelector(".calT");
-    fitWidth(calT, parseFloat(getComputedStyle(calT).fontSize), cw * 0.86, 6);
+    // The real Monthly League calendar (today = the 6th) floats beside the phone.
+    const cw = (layout === "land" ? 30 : format === "9x16" ? 40 : 30) * u;
+    const ch = cw * (790 / 912);
+    let cx = rtl ? box.x - cw * 0.55 : box.x + box.w - cw * 0.45;
+    let cy = box.y + (layout === "land" ? box.h * 0.5 : contentK * box.w * 0.62);
+    if (layout !== "land") { cx = rtl ? box.x - cw * 0.35 : box.x + box.w - cw * 0.65; cx = Math.max(2 * u, Math.min(W - 2 * u - cw, cx)); }
+    if (layout === "land") cx = Math.max(W * 0.5 + 2 * u, Math.min(W - 3 * u - cw, cx));
+    if (layout === "land" && rtl) cx = Math.max(3 * u, Math.min(W * 0.5 - 2 * u - cw, box.x - cw * 0.55));
+    if (layout !== "land" && box.ctaTop) cy = Math.min(cy, box.ctaTop - ch - 3 * u);
+    hero.insertAdjacentHTML("beforeend", `<div class="card" style="left:${cx}px;top:${cy}px;width:${cw}px;transform:rotate(${rtl ? -4 : 4}deg);z-index:10"><img src="assets/app/calendar.png"></div>`);
   }
   if (concept === "minimal") {
     const tf = (layout === "land" ? 3.2 : format === "9x16" ? 4.2 : 3.2) * u;
     const pill = document.createElement("div");
-    pill.className = "timerPill glass";
-    pill.dir = "ltr";
-    pill.style.cssText = `--tf:${tf}px;`;
+    pill.className = "timerPill"; pill.dir = "ltr"; pill.style.cssText = `--tf:${tf}px;`;
     pill.innerHTML = `${ICON.timer}03:47`;
     hero.appendChild(pill);
     const pwid = pill.getBoundingClientRect().width;
-    const tx = rtl ? phoneBox.x - pwid * 0.7 : phoneBox.x + phoneBox.w - pwid * 0.3;
+    // Sits on the status-bar corner so it never covers the board.
+    const tx = rtl ? box.x - pwid * 0.45 : box.x + box.w - pwid * 0.55;
     pill.style.left = Math.max(4 * u, Math.min(W - 4 * u - pwid, tx)) + "px";
-    pill.style.top = phoneBox.y + phoneBox.w * 0.42 + "px";
+    pill.style.top = box.y - pill.getBoundingClientRect().height * 0.25 + "px";
   }
   return true;
 }

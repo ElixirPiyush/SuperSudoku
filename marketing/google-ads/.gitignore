@@ -1,3 +1,4 @@
-# Rendered assets are regenerated from the generator (npm run all)
-output/
+# Working files
+output/preview/
+output/audio/
 generator/node_modules/

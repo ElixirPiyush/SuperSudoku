@@ -45,6 +45,7 @@ function puzzleData() {
   const puzzles = buildPuzzles();
   const counts = { main: 12, daily: 10, hard: 8, expert: 9, medium: 14, easy: 0 };
   const fills = {};
+  fills.real = [1];
   for (const [name, n] of Object.entries(counts)) {
     const rand = seeded(name.length * 7919 + 17);
     const empties = puzzles[name].puzzle.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);

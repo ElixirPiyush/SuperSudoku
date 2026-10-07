@@ -1,0 +1,375 @@
+[
+ {
+  "name": "super_sudoku_en_brain_challenge_16x9",
+  "lang": "en",
+  "concept": "brain",
+  "format": "16x9",
+  "file": "images/en/super_sudoku_en_brain_challenge_16x9.jpg",
+  "bytes": 317598,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 103.68
+ },
+ {
+  "name": "super_sudoku_en_brain_challenge_191x1",
+  "lang": "en",
+  "concept": "brain",
+  "format": "191x1",
+  "file": "images/en/super_sudoku_en_brain_challenge_191x1.jpg",
+  "bytes": 160267,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 60.288
+ },
+ {
+  "name": "super_sudoku_en_brain_challenge_1x1",
+  "lang": "en",
+  "concept": "brain",
+  "format": "1x1",
+  "file": "images/en/super_sudoku_en_brain_challenge_1x1.jpg",
+  "bytes": 247890,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 88.8
+ },
+ {
+  "name": "super_sudoku_en_brain_challenge_4x5",
+  "lang": "en",
+  "concept": "brain",
+  "format": "4x5",
+  "file": "images/en/super_sudoku_en_brain_challenge_4x5.jpg",
+  "bytes": 288910,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 98.4
+ },
+ {
+  "name": "super_sudoku_en_brain_challenge_9x16",
+  "lang": "en",
+  "concept": "brain",
+  "format": "9x16",
+  "file": "images/en/super_sudoku_en_brain_challenge_9x16.jpg",
+  "bytes": 325230,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 108
+ },
+ {
+  "name": "super_sudoku_en_daily_challenge_16x9",
+  "lang": "en",
+  "concept": "daily",
+  "format": "16x9",
+  "file": "images/en/super_sudoku_en_daily_challenge_16x9.jpg",
+  "bytes": 346680,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 103.68
+ },
+ {
+  "name": "super_sudoku_en_daily_challenge_191x1",
+  "lang": "en",
+  "concept": "daily",
+  "format": "191x1",
+  "file": "images/en/super_sudoku_en_daily_challenge_191x1.jpg",
+  "bytes": 168032,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 60.288
+ },
+ {
+  "name": "super_sudoku_en_daily_challenge_1x1",
+  "lang": "en",
+  "concept": "daily",
+  "format": "1x1",
+  "file": "images/en/super_sudoku_en_daily_challenge_1x1.jpg",
+  "bytes": 246784,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 82.8
+ },
+ {
+  "name": "super_sudoku_en_daily_challenge_4x5",
+  "lang": "en",
+  "concept": "daily",
+  "format": "4x5",
+  "file": "images/en/super_sudoku_en_daily_challenge_4x5.jpg",
+  "bytes": 312558,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 91.4
+ },
+ {
+  "name": "super_sudoku_en_daily_challenge_9x16",
+  "lang": "en",
+  "concept": "daily",
+  "format": "9x16",
+  "file": "images/en/super_sudoku_en_daily_challenge_9x16.jpg",
+  "bytes": 381336,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 108
+ },
+ {
+  "name": "super_sudoku_en_difficulty_16x9",
+  "lang": "en",
+  "concept": "levels",
+  "format": "16x9",
+  "file": "images/en/super_sudoku_en_difficulty_16x9.jpg",
+  "bytes": 284775,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 82.56
+ },
+ {
+  "name": "super_sudoku_en_difficulty_191x1",
+  "lang": "en",
+  "concept": "levels",
+  "format": "191x1",
+  "file": "images/en/super_sudoku_en_difficulty_191x1.jpg",
+  "bytes": 143041,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 48.496
+ },
+ {
+  "name": "super_sudoku_en_difficulty_1x1",
+  "lang": "en",
+  "concept": "levels",
+  "format": "1x1",
+  "file": "images/en/super_sudoku_en_difficulty_1x1.jpg",
+  "bytes": 234717,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 87.8
+ },
+ {
+  "name": "super_sudoku_en_difficulty_4x5",
+  "lang": "en",
+  "concept": "levels",
+  "format": "4x5",
+  "file": "images/en/super_sudoku_en_difficulty_4x5.jpg",
+  "bytes": 264864,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 91.4
+ },
+ {
+  "name": "super_sudoku_en_difficulty_9x16",
+  "lang": "en",
+  "concept": "levels",
+  "format": "9x16",
+  "file": "images/en/super_sudoku_en_difficulty_9x16.jpg",
+  "bytes": 319162,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 108
+ },
+ {
+  "name": "super_sudoku_en_main_16x9",
+  "lang": "en",
+  "concept": "main",
+  "format": "16x9",
+  "file": "images/en/super_sudoku_en_main_16x9.jpg",
+  "bytes": 268863,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 103.68
+ },
+ {
+  "name": "super_sudoku_en_main_191x1",
+  "lang": "en",
+  "concept": "main",
+  "format": "191x1",
+  "file": "images/en/super_sudoku_en_main_191x1.jpg",
+  "bytes": 136597,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 60.288
+ },
+ {
+  "name": "super_sudoku_en_main_1x1",
+  "lang": "en",
+  "concept": "main",
+  "format": "1x1",
+  "file": "images/en/super_sudoku_en_main_1x1.jpg",
+  "bytes": 216753,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 88.8
+ },
+ {
+  "name": "super_sudoku_en_main_4x5",
+  "lang": "en",
+  "concept": "main",
+  "format": "4x5",
+  "file": "images/en/super_sudoku_en_main_4x5.jpg",
+  "bytes": 252249,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 98.4
+ },
+ {
+  "name": "super_sudoku_en_main_9x16",
+  "lang": "en",
+  "concept": "main",
+  "format": "9x16",
+  "file": "images/en/super_sudoku_en_main_9x16.jpg",
+  "bytes": 288639,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins Medium",
+   "Poppins"
+  ],
+  "headlinePx": 108
+ },
+ {
+  "name": "super_sudoku_en_minimal_16x9",
+  "lang": "en",
+  "concept": "minimal",
+  "format": "16x9",
+  "file": "images/en/super_sudoku_en_minimal_16x9.jpg",
+  "bytes": 285640,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins",
+   "Poppins Medium"
+  ],
+  "headlinePx": 113.4
+ },
+ {
+  "name": "super_sudoku_en_minimal_191x1",
+  "lang": "en",
+  "concept": "minimal",
+  "format": "191x1",
+  "file": "images/en/super_sudoku_en_minimal_191x1.jpg",
+  "bytes": 143366,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins",
+   "Poppins Medium"
+  ],
+  "headlinePx": 65.94
+ },
+ {
+  "name": "super_sudoku_en_minimal_1x1",
+  "lang": "en",
+  "concept": "minimal",
+  "format": "1x1",
+  "file": "images/en/super_sudoku_en_minimal_1x1.jpg",
+  "bytes": 213167,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins"
+  ],
+  "headlinePx": 82.8
+ },
+ {
+  "name": "super_sudoku_en_minimal_4x5",
+  "lang": "en",
+  "concept": "minimal",
+  "format": "4x5",
+  "file": "images/en/super_sudoku_en_minimal_4x5.jpg",
+  "bytes": 250830,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins"
+  ],
+  "headlinePx": 91.4
+ },
+ {
+  "name": "super_sudoku_en_minimal_9x16",
+  "lang": "en",
+  "concept": "minimal",
+  "format": "9x16",
+  "file": "images/en/super_sudoku_en_minimal_9x16.jpg",
+  "bytes": 299875,
+  "issues": [],
+  "fonts": [
+   "Poppins ExtraBold",
+   "Poppins",
+   "Poppins Medium"
+  ],
+  "headlinePx": 108
+ }
+]

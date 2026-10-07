@@ -18,13 +18,15 @@ const FORMATS = { "9x16": [1080, 1920], "16x9": [1920, 1080] };
   const page = await browser.newPage();
   const cdp = await page.context().newCDPSession(page);
   const report = [];
-  for (const lang of Object.keys(LANGS)) for (const kind of ["15s", "30s"]) for (const fmt of Object.keys(FORMATS)) {
+  const li = process.argv.indexOf("--lang");
+  const langs = li > -1 ? process.argv[li + 1].split(",") : Object.keys(LANGS);
+  for (const lang of langs) for (const kind of ["15s", "30s"]) for (const fmt of Object.keys(FORMATS)) {
     const [W, H] = FORMATS[fmt];
     const L = LANGS[lang];
     await page.setViewportSize({ width: W, height: H });
     await page.goto(base + "/video.html");
     await page.evaluate(() => Promise.all([...document.fonts].map((f) => f.load())));
-    await page.evaluate((cfg) => window.setup(cfg), { lang, dir: L.dir, script: SCRIPT[lang], font: FONT[SCRIPT[lang]], copy: L, kind, W, H, ...data });
+    await page.evaluate(async (cfg) => { await window.setup(cfg); }, { lang, dir: L.dir, script: SCRIPT[lang], font: FONT[SCRIPT[lang]], copy: L, kind, W, H, ...data });
     const issues = [];
     // Make every caption visible so geometry is measurable.
     const geo = await page.evaluate(({ W, H }) => {

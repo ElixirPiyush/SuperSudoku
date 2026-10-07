@@ -1,0 +1,58 @@
+[
+ {
+  "name": "super_sudoku_en_video_15s_9x16",
+  "lang": "en",
+  "kind": "15s",
+  "format": "9x16",
+  "file": "videos/en/super_sudoku_en_video_15s_9x16.mp4",
+  "issues": [],
+  "duration": 15,
+  "width": 1080,
+  "height": 1920,
+  "fps": "30/1",
+  "audio": "aac",
+  "bytes": 3888378
+ },
+ {
+  "name": "super_sudoku_en_video_15s_16x9",
+  "lang": "en",
+  "kind": "15s",
+  "format": "16x9",
+  "file": "videos/en/super_sudoku_en_video_15s_16x9.mp4",
+  "issues": [],
+  "duration": 15,
+  "width": 1920,
+  "height": 1080,
+  "fps": "30/1",
+  "audio": "aac",
+  "bytes": 2899011
+ },
+ {
+  "name": "super_sudoku_en_video_30s_9x16",
+  "lang": "en",
+  "kind": "30s",
+  "format": "9x16",
+  "file": "videos/en/super_sudoku_en_video_30s_9x16.mp4",
+  "issues": [],
+  "duration": 30,
+  "width": 1080,
+  "height": 1920,
+  "fps": "30/1",
+  "audio": "aac",
+  "bytes": 5966869
+ },
+ {
+  "name": "super_sudoku_en_video_30s_16x9",
+  "lang": "en",
+  "kind": "30s",
+  "format": "16x9",
+  "file": "videos/en/super_sudoku_en_video_30s_16x9.mp4",
+  "issues": [],
+  "duration": 30,
+  "width": 1920,
+  "height": 1080,
+  "fps": "30/1",
+  "audio": "aac",
+  "bytes": 5362003
+ }
+]

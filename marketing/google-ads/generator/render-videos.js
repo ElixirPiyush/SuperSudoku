@@ -28,7 +28,7 @@ async function renderOne(page, job, data, preview) {
   await page.setViewportSize({ width: W, height: H });
   await page.goto(job.base + "/video.html");
   await page.evaluate(() => Promise.all([...document.fonts].map((f) => f.load())));
-  const info = await page.evaluate((cfg) => window.setup(cfg), {
+  const info = await page.evaluate(async (cfg) => window.setup(cfg), {
     lang, dir: L.dir, script: SCRIPT[lang], font: FONT[SCRIPT[lang]], copy: L, kind, W, H, ...data,
   });
   await page.evaluate(() => Promise.all([...document.images].map((i) => i.complete || new Promise((r) => (i.onload = r)))));

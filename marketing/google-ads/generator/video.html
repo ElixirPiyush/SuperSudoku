@@ -5,19 +5,14 @@
 <title>Super Sudoku video</title>
 <link rel="stylesheet" href="shared.css">
 <style>
-  #stage { position: relative; }
-  #cam { position: absolute; will-change: transform; }
-  .dip { position: absolute; inset: 0; z-index: 9; background: #061229; pointer-events: none; }
-  #cap { position: absolute; z-index: 20; display: flex; flex-direction: column; }
-  #cap .h { will-change: transform, opacity; }
+  #cam { position: absolute; will-change: transform; z-index: 5; }
+  #cap { position: absolute; z-index: 20; }
   #lockTop { position: absolute; z-index: 20; }
   #end { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  #end .icon { border-radius: 22%; box-shadow: 0 2em 5em rgba(0,0,0,0.55), 0 0 6em rgba(79,195,247,0.35); }
-  #end .wm { font-family: "Poppins", sans-serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
-  #end .wm span { color: var(--brand); }
-  .lvWord { transition: none; }
-  .lvWord.dim { opacity: 0.35; }
-  .lvWord.on { color: var(--gold-1); }
+  #end .icon { border-radius: 22%; box-shadow: 0 2em 5em rgba(2, 12, 60, 0.5); }
+  .lvWord.dim { opacity: 0.4; }
+  .lvWord.on { color: var(--gold-2); }
+  #calW { position: absolute; z-index: 12; }
 </style>
 <script src="shared.js"></script>
 </head>
@@ -25,8 +20,9 @@
 <div id="stage"></div>
 <script>
 // Frame-accurate video timeline. setup(cfg) builds the scene; frame(t) draws
-// time t (seconds). Every tap selects an empty cell and enters the value from
-// the verified solution, so all on-screen gameplay is legal Sudoku.
+// time t (seconds). Game screens continue the real board from the app
+// screenshot; every entered digit comes from its verified solution. Home and
+// result screens are the real app screenshots.
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const seg = (t, a, b) => clamp((t - a) / (b - a));
@@ -35,26 +31,23 @@ const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) 
 const backOut = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
 const lerp = (a, b, x) => a + (b - a) * x;
 
-let C, P, F, W, H, u, portrait, rtl, TL, EVENTS;
+let C, P, W, H, u, portrait, rtl, TL;
 
-// Camera keyframes: [t, scale, originX(0..1 of phone), originY, dx(u), dy(u), opacity]
+// Real home-screen hotspots (screenshot px).
+const HOME = {
+  cont: [362, 747, 545, 120],             // "Continue Today's Challenge" (cx, cy, w, h)
+  dailyCard: [497, 540],
+  qp: [0, 1, 2, 3].map((i) => [40 + i * 233 + 106, 1829, 222, 244]),
+};
+
 function camAt(t) {
   const k = TL.cam;
   if (t <= k[0][0]) return k[0];
-  for (let i = 1; i < k.length; i++) {
-    if (t <= k[i][0]) {
-      const a = k[i - 1], b = k[i], x = easeInOut(seg(t, a[0], b[0]));
-      return a.map((v, j) => (j === 0 ? t : lerp(v, b[j], x)));
-    }
+  for (let i = 1; i < k.length; i++) if (t <= k[i][0]) {
+    const a = k[i - 1], b = k[i], x = easeInOut(seg(t, a[0], b[0]));
+    return a.map((v, j) => (j === 0 ? t : lerp(v, b[j], x)));
   }
   return k[k.length - 1];
-}
-
-function solvedExcept(name, n) {
-  const p = P[name];
-  const empties = p.puzzle.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
-  const keep = [empties[3], empties[Math.floor(empties.length / 2)], empties[empties.length - 2]].slice(0, n);
-  return { values: p.solution.map((v, i) => (keep.includes(i) ? 0 : v)), last: keep };
 }
 
 function candidates(values, i) {
@@ -69,328 +62,266 @@ function candidates(values, i) {
   }
   return out;
 }
+const empties = (vals) => vals.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
+const pick = (vals, n, off = 0) => { const e = empties(vals); return Array.from({ length: n }, (_, k) => e[(off + Math.floor(((k + 0.5) * e.length) / n)) % e.length]); };
+const fill = (t, i) => ({ k: "fill", t, i });
 
-// A "board segment": puzzle + starting values + scripted moves within [a,b).
-// Move kinds: fill {t, i}, note {t, i, v}, notesOn {t, on}
-function boardSeg(a, b, name, opts = {}) {
-  const p = P[name];
-  const values = opts.values || [...p.puzzle];
-  if (opts.prefill) for (const i of F[name] || []) values[i] = p.solution[i];
-  return { a, b, name, puzzle: p.puzzle, solution: p.solution, values, moves: opts.moves || [], meta: opts.meta, win: opts.win };
+function gameSeg(a, b, p, values, moves, meta) { return { a, b, kind: "game", puzzle: p.puzzle, solution: p.solution, values, moves, ...meta }; }
+function shotSeg(a, b, name, extra = {}) { return { a, b, kind: "shot", name, rings: [], taps: [], ...extra }; }
+function nearDone(p, n) {
+  const e = empties(p.puzzle);
+  const keep = [e[2], e[Math.floor(e.length / 2)], e[e.length - 3]].slice(0, n);
+  return { values: p.solution.map((v, i) => (keep.includes(i) ? 0 : v)), last: keep };
 }
 
 function buildTimeline(kind) {
-  const ev = [];
-  const fill = (t, i) => ({ k: "fill", t, i });
-  const empties = (vals) => vals.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
-  // pick n empty cells spread over the board (deterministic)
-  const pick = (vals, n, off = 0) => { const e = empties(vals); return Array.from({ length: n }, (_, k) => e[(off + Math.floor(((k + 0.5) * e.length) / n)) % e.length]); };
-
+  const real = P.real, daily = P.daily;
+  const dV = [...daily.puzzle]; for (const i of P.fillsDaily) dV[i] = daily.solution[i];
+  const near = nearDone(daily, kind === "15s" ? 2 : 2);
   const segs = [];
   if (kind === "15s") {
-    const mainV = [...P.main.puzzle]; for (const i of F.main) mainV[i] = P.main.solution[i];
-    const m = pick(mainV, 3, 2);
-    segs.push(boardSeg(0, 6, "main", { values: mainV, moves: [fill(3.75, m[0]), fill(4.6, m[1]), fill(5.45, m[2])], meta: { title: "Classic", chip: "Medium", t0: 252 } }));
-    const dV = [...P.daily.puzzle]; for (const i of F.daily) dV[i] = P.daily.solution[i];
-    const dm = pick(dV, 2, 5);
-    segs.push(boardSeg(6, 10, "daily", { values: dV, moves: [fill(7.9, dm[0]), fill(8.9, dm[1])], meta: { title: "Daily Challenge", titleIcon: "cal", chip: "Hard", t0: 361 } }));
-    const near = solvedExcept("daily", 3);
-    segs.push(boardSeg(10, 15, "daily", { values: near.values, moves: [fill(10.55, near.last[0]), fill(11.2, near.last[1]), fill(11.85, near.last[2])], meta: { title: "Daily Challenge", titleIcon: "cal", chip: "Hard", t0: 728 }, win: { at: 11.9 } }));
+    const m = pick(real.shown, 3, 1);
+    segs.push(gameSeg(0, 6, real, [...real.shown], [fill(3.7, m[0]), fill(4.55, m[1]), fill(5.4, m[2])], { level: "Easy", t0: 293 }));
+    segs.push(shotSeg(6, 9.1, "home", { rings: [{ a: 7.4, b: 8.75, box: HOME.cont }], taps: [{ t: 8.45, x: HOME.cont[0], y: HOME.cont[1] }] }));
+    segs.push(gameSeg(9.1, 10, daily, dV, [fill(9.7, pick(dV, 1, 4)[0])], { level: "Medium", t0: 41 }));
+    segs.push(gameSeg(10, 11.95, daily, near.values, [fill(10.55, near.last[0]), fill(11.2, near.last[1])], { level: "Medium", t0: 92, win: 11.25 }));
+    segs.push(shotSeg(11.95, 15, "daily_result"));
     return {
-      dur: 15, segs, dips: [6, 10],
-      cam: [[0, 0.9, 0.5, 0.45, 0, 4, 0], [0.7, 1, 0.5, 0.45, 0, 0, 1], [3, 1, 0.5, 0.45, 0, 0, 1], [5.8, 1.07, 0.5, 0.4, 0, 0, 1], [6.2, 1, 0.5, 0.45, 0, 0, 1], [12.9, 1.04, 0.5, 0.45, 0, 0, 1], [13.5, 0.86, 0.5, 0.45, 0, 6, 0]],
+      dur: 15, segs, dips: [6, 9.1, 10, 11.95],
+      cam: [[0, 0.92, 0.5, 0.45, 0, 4, 0], [0.7, 1, 0.5, 0.45, 0, 0, 1], [3, 1, 0.5, 0.45, 0, 0, 1], [5.8, 1.06, 0.5, 0.4, 0, 0, 1],
+        [6.1, 1, 0.5, 0.3, 0, 0, 1], [8.9, 1.12, 0.5, 0.3, 0, 0, 1], [9.15, 1, 0.5, 0.45, 0, 0, 1], [12.9, 1.03, 0.5, 0.45, 0, 0, 1], [13.5, 0.86, 0.5, 0.45, 0, 6, 0]],
       caps: [["love", 0.35, 2.85], ["challenge", 3.15, 5.85], ["daily", 6.2, 9.85], ["canYou", 10.15, 12.9]],
-      cal: [6.35, 9.9], levels: null, end: 13.2,
+      cal: [6.4, 9.0], levels: null, end: 13.2,
     };
   }
   // ---------------------------------------------------------------- 30s
-  const hookV = [...P.expert.puzzle];
-  const mainV = [...P.main.puzzle]; for (const i of F.main) mainV[i] = P.main.solution[i];
-  const g = pick(mainV, 4, 1);
-  // notes cell: an empty cell (not one we fill) with 2-3 candidates
-  const afterG = [...mainV]; for (const i of g) afterG[i] = P.main.solution[i];
-  const ne = empties(afterG).filter((i) => { const c = candidates(afterG, i); return c.length >= 2 && c.length <= 3; });
-  const nc = ne[Math.floor(ne.length / 2)] ?? empties(afterG)[0];
-  const cand = candidates(afterG, nc);
-  const other = empties(afterG).filter((i) => i !== nc && Math.floor(i / 9) === Math.floor(nc / 9))[0] ?? empties(afterG).find((i) => i !== nc);
-  segs.push(boardSeg(0, 4.6, "expert", { values: hookV, meta: { title: "Classic", chip: "Expert", t0: 3 } }));
-  segs.push(boardSeg(4.6, 14, "main", {
-    values: mainV,
-    moves: [fill(5.6, g[0]), fill(6.45, g[1]), fill(7.3, g[2]), fill(8.15, g[3]),
-      { k: "notesOn", t: 9.7, on: true }, { k: "sel", t: 10.15, i: nc }, ...cand.map((v, k) => ({ k: "note", t: 10.6 + k * 0.45, i: nc, v })),
-      { k: "notesOn", t: 11.95, on: false }, fill(12.55, nc), fill(13.35, other)],
-    meta: { title: "Classic", chip: "Medium", t0: 95 },
-  }));
-  const lv = ["easy", "medium", "hard", "expert"], lvChip = ["Easy", "Medium", "Hard", "Expert"];
-  lv.forEach((n, k) => segs.push(boardSeg(14 + k * 1.25, 15.25 + k * 1.25, n, { values: [...P[n].puzzle], meta: { title: "Classic", chip: lvChip[k], t0: 0 } })));
-  const dV = [...P.daily.puzzle]; for (const i of F.daily) dV[i] = P.daily.solution[i];
-  const dm = pick(dV, 2, 5);
-  segs.push(boardSeg(19, 24, "daily", { values: dV, moves: [fill(21.3, dm[0]), fill(22.4, dm[1])], meta: { title: "Daily Challenge", titleIcon: "cal", chip: "Hard", t0: 361 } }));
-  const near = solvedExcept("daily", 2);
-  segs.push(boardSeg(24, 30, "daily", { values: near.values, moves: [fill(24.55, near.last[0]), fill(25.25, near.last[1])], meta: { title: "Daily Challenge", titleIcon: "cal", chip: "Hard", t0: 728 }, win: { at: 25.3 } }));
+  const g = pick(real.shown, 4, 0);
+  const after = [...real.shown]; for (const i of g) after[i] = real.solution[i];
+  const ne = empties(after).filter((i) => { const c = candidates(after, i); return c.length >= 2 && c.length <= 3; });
+  const nc = ne[Math.floor(ne.length / 2)] ?? empties(after)[0];
+  const cand = candidates(after, nc);
+  const other = empties(after).find((i) => i !== nc && Math.floor(i / 9) !== Math.floor(nc / 9));
+  segs.push(gameSeg(0, 14, real, [...real.shown], [fill(5.6, g[0]), fill(6.45, g[1]), fill(7.3, g[2]), fill(8.15, g[3]),
+    { k: "notesOn", t: 9.7, on: true }, { k: "sel", t: 10.15, i: nc }, ...cand.map((v, k) => ({ k: "note", t: 10.65 + k * 0.45, i: nc, v })),
+    { k: "notesOn", t: 11.95, on: false }, fill(12.6, nc), fill(13.4, other)], { level: "Easy", t0: 241 }));
+  const qpRings = HOME.qp.map((b, k) => ({ a: 14.5 + k * 1.1, b: 15.6 + k * 1.1, box: b }));
+  segs.push(shotSeg(14, 19, "home", { rings: qpRings, taps: HOME.qp.map((b, k) => ({ t: 14.65 + k * 1.1, x: b[0], y: b[1] })) }));
+  segs.push(shotSeg(19, 22.2, "home", { rings: [{ a: 20.7, b: 22.0, box: HOME.cont }], taps: [{ t: 21.75, x: HOME.cont[0], y: HOME.cont[1] }] }));
+  segs.push(gameSeg(22.2, 24, daily, dV, [fill(22.9, pick(dV, 2, 4)[0]), fill(23.6, pick(dV, 2, 4)[1])], { level: "Medium", t0: 41 }));
+  segs.push(gameSeg(24, 25.95, daily, near.values, [fill(24.5, near.last[0]), fill(25.15, near.last[1])], { level: "Medium", t0: 92, win: 25.2 }));
+  segs.push(shotSeg(25.95, 30, "daily_result"));
   return {
-    dur: 30, segs, dips: [4.6, 19, 24],
-    cam: [[0, 1.55, 0.5, 0.4, 0, 0, 0], [0.5, 1.58, 0.5, 0.4, 0, 0, 1], [4.2, 1.7, 0.5, 0.4, 0, 0, 1], [5.1, 1, 0.5, 0.45, 0, 0, 1],
-      [9.1, 1, 0.5, 0.45, 0, 0, 1], [9.7, 1.32, 0.5, 0.62, 0, 0, 1], [13.6, 1.32, 0.5, 0.62, 0, 0, 1], [14.2, 0.9, 0.5, 0.45, 0, 8, 1],
-      [18.6, 0.9, 0.5, 0.45, 0, 8, 1], [19.2, 1, 0.5, 0.45, 0, 0, 1], [26.6, 1.04, 0.5, 0.45, 0, 0, 1], [27.3, 0.86, 0.5, 0.45, 0, 6, 0]],
-    caps: [["hook", 0.45, 4.3], ["levels", 14.25, 18.85], ["dailyB", 19.25, 23.85], ["solved", 25.6, 27.0]],
-    cal: [19.35, 23.9], levels: [14, 19], end: 27.3,
+    dur: 30, segs, dips: [14, 19, 22.2, 24, 25.95],
+    cam: [[0, 1.55, 0.5, 0.33, 0, 0, 0], [0.5, 1.58, 0.5, 0.33, 0, 0, 1], [4.2, 1.7, 0.5, 0.33, 0, 0, 1], [5.1, 1, 0.5, 0.45, 0, 0, 1],
+      [9.1, 1, 0.5, 0.45, 0, 0, 1], [9.7, 1.3, 0.5, 0.7, 0, 0, 1], [13.7, 1.3, 0.5, 0.7, 0, 0, 1], [14.05, 1.32, 0.5, 0.9, 0, 0, 1],
+      [18.8, 1.38, 0.5, 0.9, 0, 0, 1], [19.05, 1.1, 0.5, 0.3, 0, 0, 1], [22.0, 1.18, 0.5, 0.3, 0, 0, 1], [22.25, 1, 0.5, 0.45, 0, 0, 1],
+      [26.6, 1.03, 0.5, 0.45, 0, 0, 1], [27.3, 0.86, 0.5, 0.45, 0, 6, 0]],
+    caps: [["hook", 0.45, 4.3], ["levels", 14.25, 18.85], ["dailyB", 19.25, 23.85], ["solved", 25.4, 27.0]],
+    cal: [19.4, 22.1], levels: [14.5, 1.1], end: 27.3,
   };
 }
 
-// --------------------------------------------------------------- build
-function setup(cfg) {
-  C = cfg.copy; P = cfg.puzzles; F = cfg.fills; W = cfg.W; H = cfg.H;
+const SHOTS = ["home", "daily_result"];
+async function preload() {
+  await Promise.all(["icon", "calendar", ...SHOTS].map((n) => { const i = new Image(); i.src = `assets/app/${n}.png`; return i.decode(); }));
+}
+
+async function setup(cfg) {
+  await preload();
+  C = cfg.copy; P = { ...cfg.puzzles, fillsDaily: cfg.fills.daily }; W = cfg.W; H = cfg.H;
   portrait = H > W; rtl = cfg.dir === "rtl"; u = Math.min(W, H) / 100;
   TL = buildTimeline(cfg.kind);
   const scriptCls = cfg.script === "latin" ? "lat" : cfg.script === "arab" ? "ar" : "cx";
-  const stage = document.getElementById("stage");
   const pw = (portrait ? 56 : 40) * u;
   const px = portrait ? (W - pw) / 2 : rtl ? W * 0.265 - pw / 2 : W * 0.735 - pw / 2;
-  const py = portrait ? 50 * u : (H - pw * 2.06) / 2;
+  const py = portrait ? 50 * u : (H - pw * PHONE_RATIO) / 2;
   TL.phone = { pw, px, py };
-  stage.innerHTML = `<div class="canvas ${scriptCls}" dir="${cfg.dir}" lang="${cfg.lang}" style="--W:${W}px;--H:${H}px;--u:${u}px">
-    <div class="bg" id="bg"><div class="grain"></div></div>
-    <div id="tiles"></div>
-    <div id="cam" style="left:${px}px;top:${py}px;width:${pw}px;height:${pw * 2.06}px">${phone("", { pw, x: 0, y: 0 })}</div>
-    <div id="calW"></div>
-    <div id="lockTop">${lockup((portrait ? 4.4 : 3.4) * u)}</div>
-    <div id="cap"></div>
-    <div id="end"></div>
-  </div>`;
-  const canvas = stage.firstElementChild;
+  document.getElementById("stage").innerHTML = `<div class="canvas ${scriptCls}" dir="${cfg.dir}" lang="${cfg.lang}" style="--W:${W}px;--H:${H}px;--u:${u}px">
+    <div class="bg"><div class="grid"></div></div><div id="tiles"></div>
+    <div id="cam" style="left:${px}px;top:${py}px;width:${pw}px;height:${pw * PHONE_RATIO}px">${phone("", { pw, x: 0, y: 0 })}</div>
+    <div id="calW"></div><div id="lockTop">${lockup((portrait ? 4.4 : 3.4) * u)}</div><div id="cap"></div><div id="end"></div></div>`;
+  const canvas = document.querySelector(".canvas");
   canvas.style.fontFamily = cfg.font;
   const lt = document.getElementById("lockTop");
-  if (portrait) lt.style.cssText = `left:0;right:0;top:${6 * u}px;display:flex;justify-content:center`;
-  else lt.style.cssText = `top:${8 * u}px;${rtl ? "right" : "left"}:${8 * u}px`;
+  lt.style.cssText = portrait ? `left:0;right:0;top:${6 * u}px;display:flex;justify-content:center` : `top:${8 * u}px;${rtl ? "right" : "left"}:${8 * u}px`;
 
-  // caption box
+  // captions
   const cap = document.getElementById("cap");
   const capW = portrait ? W - 14 * u : W * 0.5 - 16 * u;
-  if (portrait) cap.style.cssText = `left:${7 * u}px;width:${capW}px;top:${15 * u}px;height:${31 * u}px;justify-content:center;align-items:center;text-align:center`;
-  else cap.style.cssText = `${rtl ? "right" : "left"}:${8 * u}px;width:${capW}px;top:${20 * u}px;height:${62 * u}px;justify-content:center;align-items:${rtl ? "flex-end" : "flex-start"};text-align:${rtl ? "right" : "left"}`;
+  const capH = portrait ? 31 * u : 62 * u;
+  cap.style.cssText = portrait ? `left:${7 * u}px;width:${capW}px;top:${15 * u}px;height:${capH}px` : `${rtl ? "right" : "left"}:${8 * u}px;width:${capW}px;top:${20 * u}px;height:${capH}px`;
   const lh = scriptCls === "lat" ? 1.08 : 1.34;
   const hS = (portrait ? 9.6 : 8.6) * u;
-  const capBoxH = (portrait ? 31 : 40) * u;
   TL.capEls = {};
   for (const [key] of TL.caps) {
-    let html;
-    if (key === "levels") {
-      html = C.lv.map((w, k) => `<span class="lvWord" data-k="${k}">${w}</span>`).join(`<span style="opacity:.45"> • </span>`);
-    } else html = null;
     const el = document.createElement("div");
     el.className = "h";
-    el.style.cssText = `position:absolute;width:${capW}px;opacity:0`;
-    if (html) el.innerHTML = html; else el.textContent = C.v[key];
+    el.style.cssText = `position:absolute;width:${capW}px;opacity:0;text-align:${portrait ? "center" : rtl ? "right" : "left"};${!portrait ? (rtl ? "right:0;" : "left:0;") : ""}`;
+    if (key === "levels") el.innerHTML = C.lv.map((w, k) => `<span class="lvWord" data-k="${k}">${w}</span>`).join(`<span style="opacity:.5">\u00A0• </span>`);
+    else el.textContent = C.v[key];
     cap.appendChild(el);
-    const maxH = key === "levels" ? (portrait ? 2 : 3) * hS * 0.7 * lh : capBoxH;
-    fitText(el, key === "levels" ? hS * 0.7 : hS, maxH, 4 * u);
-    // vertical position inside the caption area
+    const start = key === "levels" ? hS * 0.72 : hS;
+    fitText(el, start, key === "levels" ? 2 * start * lh : portrait ? capH : 40 * u, 4 * u);
     const r = el.getBoundingClientRect();
-    const boxH = parseFloat(cap.style.height);
-    el.style.top = (key === "levels" ? (portrait ? 0 : boxH * 0.12) : (boxH - r.height) / 2) + "px";
-    if (!portrait) el.style[rtl ? "right" : "left"] = "0px";
+    el.style.top = (key === "levels" && portrait ? capH * 0.15 : (capH - r.height) / 2) + "px";
     TL.capEls[key] = el;
   }
-  // level cards (30s)
-  if (TL.levels) {
-    const row = document.createElement("div");
-    row.id = "lvRow";
-    row.style.cssText = `position:absolute;z-index:21;opacity:0`;
-    row.innerHTML = levelRow(C.lv, P, (portrait ? 2.8 : 2.4) * u);
-    canvas.appendChild(row);
-    fitWidth(row.firstElementChild, (portrait ? 2.8 : 2.4) * u, capW, 1.2 * u);
-    const rr = row.getBoundingClientRect();
-    if (portrait) { row.style.left = (W - rr.width) / 2 + "px"; row.style.top = 26 * u + "px"; }
-    else { row.style[rtl ? "right" : "left"] = 8 * u + "px"; row.style.top = 52 * u + "px"; }
-    TL.lvRow = row;
-  }
-  // calendar
-  const cw = (portrait ? 20 : 15) * u;
-  const cx = rtl ? px - cw * 0.65 : px + pw - cw * 0.35, cy = py + (portrait ? 2 : -1) * u;
-  document.getElementById("calW").innerHTML = calendar(C.today, cw, cx, cy, rtl ? -8 : 8);
-  TL.calEl = document.querySelector(".cal");
-  TL.calEl.style.zIndex = 22;
-  const calT = TL.calEl.querySelector(".calT");
-  fitWidth(calT, parseFloat(getComputedStyle(calT).fontSize), cw * 0.86, 6);
-  // floating tiles (gentle parallax drift)
-  const tdef = [[7, "gold", 8, -0.34, 0.14], [3, "", 6.5, 1.1, 0.06], [9, "blue", 7.5, 1.14, 0.6], [4, "", 6, -0.3, 0.62]];
+  // real calendar card, floating beside the phone during Daily Challenge
+  const cw = (portrait ? 46 : 30) * u;
+  const calX = portrait ? (rtl ? 3 * u : W - cw - 3 * u) : rtl ? px + pw - cw * 0.25 : px - cw * 0.75;
+  const calY = portrait ? py + pw * 1.05 : py + pw * 1.05;
+  const calW = document.getElementById("calW");
+  calW.style.cssText = `left:${calX}px;top:${calY}px;width:${cw}px`;
+  calW.innerHTML = `<div class="card" style="position:relative;width:100%"><img src="assets/app/calendar.png"></div>`;
+  if (!portrait && !rtl && calX < W * 0.5) calW.style.left = W * 0.5 + 1 * u + "px";
+  // tiles
+  const tdef = [[5, "gold", 8, -0.34, 0.14], [3, "", 6.5, 1.1, 0.06], [9, "blue", 7.5, 1.14, 0.6], [4, "", 6, -0.3, 0.62]];
   TL.tiles = tdef.map(([d, k, s, fx, fy], n) => {
     const S = s * u * (portrait ? 1.2 : 1);
     let x = px + (rtl ? 1 - fx - S / pw : fx) * pw;
-    const y = py + fy * pw * 2.06;
+    const y = py + fy * pw * PHONE_RATIO;
     if (!portrait && (rtl ? x + S > W * 0.5 : x < W * 0.5)) return null;
     x = clamp(x, 2 * u, W - 2 * u - S);
     return { d, k, S, x, y, n };
   }).filter(Boolean);
-
   // end card
   const end = document.getElementById("end");
-  const icon = (portrait ? 30 : 22) * u;
-  end.innerHTML = `<img class="icon" src="assets/app-icon.png" style="width:${icon}px;height:${icon}px">
-    <div class="h" id="endT" style="margin-top:${(portrait ? 7 : 4.5) * u}px;width:${portrait ? 86 * u : 120 * u}px"></div>
-    <div style="margin-top:${(portrait ? 7 : 4.5) * u}px" id="endCta">${cta(C.v.install, (portrait ? 5 : 4) * u)}</div>
-    <div class="avail" style="margin-top:${(portrait ? 3.4 : 2.6) * u}px;font-size:${(portrait ? 3.4 : 2.6) * u}px">${C.available}</div>`;
+  const icon = (portrait ? 22 : 17) * u;
+  end.innerHTML = `<img class="icon" src="assets/app/icon.png" style="width:${icon}px;height:${icon}px">
+    <div class="h" id="endT" style="margin-top:${(portrait ? 6 : 4) * u}px;width:${portrait ? 86 * u : 120 * u}px"></div>
+    <div style="margin-top:${(portrait ? 6 : 4) * u}px">${cta(C.v.install, (portrait ? 5 : 4) * u)}</div>
+    <div style="margin-top:${(portrait ? 3.4 : 2.6) * u}px">${avail(C.available, (portrait ? 3.4 : 2.6) * u)}</div>`;
   document.getElementById("endT").textContent = C.v.play;
   fitText(document.getElementById("endT"), (portrait ? 9 : 7.5) * u, (portrait ? 2 : 1) * (portrait ? 9 : 7.5) * u * 1.4, 3 * u);
   fitWidth(end.querySelector(".cta"), (portrait ? 5 : 4) * u, W - 16 * u, 2.5 * u);
 
-  // event list for the sound design
-  EVENTS = [];
-  for (const s of TL.segs) for (const m of s.moves) {
-    if (m.k === "fill" || m.k === "note") { EVENTS.push({ t: m.t - 0.42, type: "tap" }, { t: m.t - 0.12, type: "tap" }, { t: m.t, type: m.k }); }
-    else EVENTS.push({ t: m.t, type: "tap" });
+  // sound-design events
+  const ev = [];
+  for (const s of TL.segs) {
+    if (s.kind === "game") {
+      for (const m of s.moves) {
+        if (m.k === "fill" || m.k === "note") ev.push({ t: m.t - 0.42, type: "tap" }, { t: m.t - 0.12, type: "tap" }, { t: m.t, type: m.k });
+        else ev.push({ t: m.t, type: "tap" });
+      }
+      if (s.win) ev.push({ t: s.win + 0.05, type: "win" });
+    } else for (const tp of s.taps) ev.push({ t: tp.t, type: "tap" }, { t: tp.t + 0.02, type: TL.levels ? "level" : "pop" });
   }
-  for (const s of TL.segs) if (s.win) EVENTS.push({ t: s.win.at + 0.1, type: "win" });
-  for (const d of TL.dips) EVENTS.push({ t: d, type: "swoosh" });
-  EVENTS.push({ t: TL.end + 0.25, type: "end" });
-  if (TL.cal) EVENTS.push({ t: TL.cal[0] + 0.1, type: "pop" });
-  if (TL.levels) for (let k = 0; k < 4; k++) EVENTS.push({ t: TL.levels[0] + k * 1.25 + 0.05, type: "level" });
-  return { dur: TL.dur, events: EVENTS };
+  for (const d of TL.dips) ev.push({ t: d, type: "swoosh" });
+  ev.push({ t: TL.end + 0.25, type: "end" });
+  return { dur: TL.dur, events: ev };
 }
 
-// position of an element's centre relative to the .app box (unscaled)
-function relCenter(el, app) {
-  let x = el.offsetWidth / 2, y = el.offsetHeight / 2, n = el;
-  while (n && n !== app) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
-  return [x, y];
-}
-
-function boardStateAt(t) {
-  const s = TL.segs.find((s) => t >= s.a && t < s.b) || TL.segs[TL.segs.length - 1];
-  const values = [...s.values], notes = {}, pop = {};
-  let selected = null, keyOn = null, notesOn = false, taps = [];
+function gameState(s, t) {
+  const values = [...s.values], notes = {}, pop = {}, taps = [];
+  let selected = null, keyOn = null, notesOn = false;
   for (const m of s.moves) {
-    if (m.k === "notesOn") {
-      if (t >= m.t) notesOn = m.on;
-      if (t >= m.t && t < m.t + 0.4) taps.push({ tool: "notes", p: seg(t, m.t, m.t + 0.4) });
-      continue;
-    }
-    if (m.k === "sel") {
-      if (t >= m.t) selected = m.i;
-      if (t >= m.t && t < m.t + 0.4) taps.push({ cell: m.i, p: seg(t, m.t, m.t + 0.4) });
-      continue;
-    }
+    if (m.k === "notesOn") { if (t >= m.t) notesOn = m.on; if (t >= m.t && t < m.t + 0.4) taps.push({ at: GEO.tool.notes, p: seg(t, m.t, m.t + 0.4) }); continue; }
+    if (m.k === "sel") { if (t >= m.t) selected = m.i; if (t >= m.t && t < m.t + 0.4) taps.push({ at: GEO.cell(m.i), p: seg(t, m.t, m.t + 0.4) }); continue; }
     const tSel = m.t - 0.42, tKey = m.t - 0.12;
     const v = m.k === "note" ? m.v : s.solution[m.i];
-    if (t >= tSel && m.k === "fill") selected = m.i;
-    if (t >= tSel && t < tSel + 0.4 && m.k === "fill") taps.push({ cell: m.i, p: seg(t, tSel, tSel + 0.4) });
-    if (t >= tKey && t < tKey + 0.4) taps.push({ key: v, p: seg(t, tKey, tKey + 0.4) });
+    if (m.k === "fill" && t >= tSel) selected = m.i;
+    if (m.k === "fill" && t >= tSel && t < tSel + 0.4) taps.push({ at: GEO.cell(m.i), p: seg(t, tSel, tSel + 0.4) });
+    if (t >= tKey && t < tKey + 0.4) taps.push({ at: GEO.key(v), p: seg(t, tKey, tKey + 0.4) });
     if (t >= tKey && t < m.t + 0.35) keyOn = v;
     if (t >= m.t) {
       if (m.k === "fill") { values[m.i] = v; delete notes[m.i]; const x = seg(t, m.t, m.t + 0.3); if (x < 1) pop[m.i] = 1 + 0.35 * Math.sin(Math.PI * x); }
       else (notes[m.i] = notes[m.i] || []).push(v);
     }
   }
-  const m = s.meta;
-  const time = fmtTime(m.t0 + Math.max(0, t - s.a));
-  let win = null, wave = null;
-  if (s.win && t >= s.win.at) {
-    // gold wave sweeps diagonally from the last placed cell
+  let wave = null;
+  if (s.win != null && t >= s.win) {
     wave = {};
-    const x = t - s.win.at;
-    for (let i = 0; i < 81; i++) {
-      const d = (Math.floor(i / 9) + (i % 9)) * 0.035;
-      const k = seg(x, d, d + 0.25), k2 = 1 - seg(x, d + 0.25, d + 0.6);
-      wave[i] = Math.min(k, k2) * 0.9;
-    }
+    const x = t - s.win;
+    for (let i = 0; i < 81; i++) { const d = (Math.floor(i / 9) + (i % 9)) * 0.035; wave[i] = Math.min(seg(x, d, d + 0.25), 1 - seg(x, d + 0.3, d + 0.65)); }
     selected = null; keyOn = null;
-    const wx = seg(t, s.win.at + 0.75, s.win.at + 1.15);
-    if (wx > 0) win = { show: true, b: 0.6 * wx, s: 0.7 + 0.3 * backOut(wx), o: wx, time: fmtTime(m.t0 + (s.win.at - s.a)) };
   }
-  return { state: { title: m.title, titleIcon: m.titleIcon, chip: m.chip, time: win ? win.time : time, mistakes: 0, puzzle: s.puzzle, values, selected, notes, pop, wave, keyOn, notesOn, win, hideSame: false }, taps };
+  const time = fmtTime(s.t0 + Math.max(0, Math.min(t, s.win ?? 1e9) - s.a));
+  const tapHtml = taps.map((tp) => `<div class="tap" style="left:${tp.at[0]}em;top:${tp.at[1]}em;transform:scale(${0.55 + 0.7 * easeOut(tp.p)});opacity:${1 - tp.p}"></div>`).join("");
+  return gameScreen({ level: s.level, time, mistakes: 0, puzzle: s.puzzle, values, selected, notes, pop, wave, keyOn, notesOn, overlay: tapHtml });
+}
+
+function shotOverlay(s, t) {
+  let o = "";
+  for (const r of s.rings) {
+    if (t < r.a || t > r.b) continue;
+    const k = Math.min(easeOut(seg(t, r.a, r.a + 0.25)), 1 - seg(t, r.b - 0.2, r.b));
+    const [cx, cy, w, h] = r.box;
+    o += `<div class="ring" style="left:${cx - w / 2}em;top:${cy - h / 2}em;width:${w}em;height:${h}em;opacity:${k};transform:scale(${0.94 + 0.06 * k})"></div>`;
+  }
+  for (const tp of s.taps) if (t >= tp.t && t < tp.t + 0.4) {
+    const p = seg(t, tp.t, tp.t + 0.4);
+    o += `<div class="tap" style="left:${tp.x}em;top:${tp.y}em;transform:scale(${0.55 + 0.7 * easeOut(p)});opacity:${1 - p}"></div>`;
+  }
+  return o;
 }
 
 function frame(t) {
   const canvas = document.querySelector(".canvas");
-  // background drift
   canvas.style.setProperty("--gx", (portrait ? 50 : rtl ? 26.5 : 73.5) + 4 * Math.sin(t * 0.4) + "%");
   canvas.style.setProperty("--gy", (portrait ? 55 : 50) + 3 * Math.cos(t * 0.33) + "%");
-
-  // camera + phone
-  const [, s, ox, oy, dx, dy, op] = camAt(t);
+  let [, sc, ox, oy, dx, dy, op] = camAt(t);
+  if (portrait) {
+    // Keep the zoomed phone below the caption band (caption ends at 46u).
+    const ph = TL.phone.pw * PHONE_RATIO, y0 = TL.phone.py + oy * ph;
+    const need = (scale) => Math.max(0, 47 * u - (y0 - oy * ph * scale + dy * u)) / u;
+    // If pushing down would drop the focal point out of frame, zoom less instead.
+    if (y0 + (dy + need(sc)) * u > H - 16 * u) sc = Math.max(1, (y0 - 47 * u) / (oy * ph));
+    dy += need(sc);
+  }
   const cam = document.getElementById("cam");
   cam.style.transformOrigin = `${ox * 100}% ${oy * 100}%`;
-  cam.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${s})`;
+  cam.style.transform = `translate(${dx * u}px, ${dy * u}px) scale(${sc})`;
   cam.style.opacity = op;
-  const { state, taps } = boardStateAt(t);
+  const s = TL.segs.find((s) => t >= s.a && t < s.b) || TL.segs[TL.segs.length - 1];
   const screen = cam.querySelector(".screen");
-  const keepCam = screen.querySelector(".cam").outerHTML + screen.querySelector(".glare").outerHTML;
-  screen.innerHTML = gameScreen(state) + keepCam;
-  const app = screen.querySelector(".app");
-  for (const tp of taps) {
-    let el;
-    if (tp.cell != null) el = app.querySelector(`.cell[data-i="${tp.cell}"]`);
-    else if (tp.key != null) el = app.querySelector(`.key[data-k="${tp.key}"]`);
-    else el = app.querySelectorAll(".tool")[2].querySelector(".ti");
-    const [x, y] = relCenter(el, app);
-    const r = document.createElement("div");
-    r.className = "tap";
-    r.style.cssText = `left:${x}px;top:${y}px;transform:scale(${0.55 + 0.7 * easeOut(tp.p)});opacity:${1 - tp.p}`;
-    app.appendChild(r);
+  if (!screen.querySelector("#live")) {
+    // Screenshot layers are created once (decoded), the live layer is redrawn per frame.
+    screen.insertAdjacentHTML("afterbegin", SHOTS.map((n) => `<div class="app shotL" data-n="${n}" style="display:none">${statusBar()}<div class="page"><img class="shot" src="assets/app/${n}.png"></div></div>`).join("") + `<div id="live" style="position:absolute;inset:0;z-index:3"></div>`);
   }
-  // screen dips between board segments
   let dip = 0;
-  for (const d of TL.dips) dip = Math.max(dip, 1 - Math.abs(t - d) / 0.22);
-  if (dip > 0) { const e = document.createElement("div"); e.className = "dip"; e.style.opacity = clamp(dip); app.appendChild(e); }
+  for (const d of TL.dips) dip = Math.max(dip, 1 - Math.abs(t - d) / 0.2);
+  screen.querySelectorAll(".shotL").forEach((l) => {
+    const on = s.kind === "shot" && l.dataset.n === s.name;
+    l.style.display = on ? "block" : "none";
+    if (on && s.name === "daily_result") {
+      const k = easeOut(seg(t, s.a + 0.05, s.a + 0.45));
+      l.querySelector(".page").style.cssText = `transform:scale(${0.96 + 0.04 * k});opacity:${0.4 + 0.6 * k}`;
+    }
+  });
+  screen.querySelector("#live").innerHTML = (s.kind === "game" ? gameState(s, t) : `<div class="page" style="position:absolute;left:0;top:70em;width:995em;height:2000em">${shotOverlay(s, t)}</div>`) + (dip > 0 ? `<div class="dip" style="opacity:${clamp(dip)}"></div>` : "");
 
-  // tiles
   document.getElementById("tiles").innerHTML = TL.tiles.map((tl) => {
     const vis = op * (1 - seg(t, TL.end - 0.2, TL.end + 0.3));
-    const fy = Math.sin(t * 0.8 + tl.n * 1.7) * 1.2 * u;
-    return `<div class="tile ${tl.k}" style="--s:${tl.S}px;left:${tl.x}px;top:${tl.y + fy}px;opacity:${vis};transform:rotate(${(tl.n % 2 ? 8 : -9) + Math.sin(t * 0.6 + tl.n) * 3}deg)">${tl.d}</div>`;
+    return `<div class="tile ${tl.k}" style="--s:${tl.S}px;left:${tl.x}px;top:${tl.y + Math.sin(t * 0.8 + tl.n * 1.7) * 1.2 * u}px;opacity:${vis};transform:rotate(${(tl.n % 2 ? 8 : -9) + Math.sin(t * 0.6 + tl.n) * 3}deg)">${tl.d}</div>`;
   }).join("");
 
-  // calendar
+  const calW = document.getElementById("calW");
   if (TL.cal) {
     const [a, b] = TL.cal;
     const x = seg(t, a, a + 0.45), y = 1 - seg(t, b - 0.3, b);
-    const k = Math.min(x, y);
-    TL.calEl.style.opacity = k > 0 ? 1 : 0;
-    TL.calEl.style.transform = `rotate(${rtl ? -8 : 8}deg) scale(${t < b - 0.3 ? backOut(x) : y})`;
+    calW.style.opacity = Math.min(x, y) > 0 ? Math.min(1, x * 2) * y : 0;
+    calW.style.transform = `rotate(${rtl ? -4 : 4}deg) translateY(${(1 - easeOut(x)) * 4 * u}px) scale(${0.9 + 0.1 * backOut(x)})`;
   }
-
-  // captions
   for (const [key, a, b] of TL.caps) {
     const el = TL.capEls[key];
     const i = easeOut(seg(t, a, a + 0.4)), o = seg(t, b - 0.3, b);
     el.style.opacity = i * (1 - o);
     el.style.transform = `translateY(${(1 - i) * 3 * u - o * 2 * u}px)`;
     if (key === "levels") {
-      const active = Math.floor((t - TL.levels[0]) / 1.25);
-      el.querySelectorAll(".lvWord").forEach((w, k) => { w.className = "lvWord" + (k === active ? " on" : k > active ? " dim" : ""); });
+      const active = Math.floor((t - TL.levels[0]) / TL.levels[1]);
+      el.querySelectorAll(".lvWord").forEach((w, k) => (w.className = "lvWord" + (k === active ? " on" : k > active ? " dim" : "")));
     }
   }
-  // level cards
-  if (TL.lvRow) {
-    const [a, b] = TL.levels;
-    const i = easeOut(seg(t, a + 0.1, a + 0.5)), o = seg(t, b - 0.35, b);
-    TL.lvRow.style.opacity = i * (1 - o);
-    TL.lvRow.style.transform = `translateY(${(1 - i) * 3 * u}px)`;
-    const active = Math.floor((t - a) / 1.25);
-    TL.lvRow.querySelectorAll(".lvl").forEach((c, k) => {
-      c.classList.toggle("top", k === active);
-      c.style.transform = k === active ? "scale(1.08)" : "scale(0.96)";
-      c.style.opacity = k === active ? 1 : 0.7;
-    });
-  }
-  // top lockup: visible during gameplay, hidden on end card
-  const lt = document.getElementById("lockTop");
-  lt.style.opacity = (1 - seg(t, TL.end - 0.3, TL.end)) * seg(t, 0.2, 0.7);
-  // end card
+  document.getElementById("lockTop").style.opacity = (1 - seg(t, TL.end - 0.3, TL.end)) * seg(t, 0.2, 0.7);
   const end = document.getElementById("end");
-  const e = seg(t, TL.end, TL.end + 0.6);
-  end.style.opacity = e > 0 ? 1 : 0;
-  const kids = end.children;
-  for (let k = 0; k < kids.length; k++) {
+  end.style.opacity = t >= TL.end ? 1 : 0;
+  [...end.children].forEach((kid, k) => {
     const x = easeOut(seg(t, TL.end + k * 0.12, TL.end + k * 0.12 + 0.5));
-    kids[k].style.opacity = x;
-    kids[k].style.transform = `translateY(${(1 - x) * 4 * u}px) scale(${k === 0 ? 0.8 + 0.2 * backOut(x) : 1})`;
-  }
-  // gentle CTA pulse once it has landed
-  const ctaEl = end.querySelector(".cta");
+    kid.style.opacity = x;
+    kid.style.transform = `translateY(${(1 - x) * 4 * u}px) scale(${k === 0 ? 0.8 + 0.2 * backOut(x) : 1})`;
+  });
   const pulse = t > TL.end + 1 ? 1 + 0.035 * Math.sin((t - TL.end - 1) * Math.PI * 1.6) : 1;
-  ctaEl.style.transform = `scale(${pulse})`;
+  end.querySelector(".cta").style.transform = `scale(${pulse})`;
 }
 
 window.setup = setup;
