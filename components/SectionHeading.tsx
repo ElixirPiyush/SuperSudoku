@@ -1,25 +1,23 @@
-import Reveal from "./Reveal";
-
 export default function SectionHeading({
   eyebrow,
   title,
-  subtitle,
-  center = true,
+  lede,
+  center = false,
+  id,
 }: {
   eyebrow?: string;
-  title: string;
-  subtitle?: string;
+  title: React.ReactNode;
+  lede?: React.ReactNode;
   center?: boolean;
+  id?: string;
 }) {
   return (
-    <Reveal className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
+    <div className={`max-w-2xl ${center ? "mx-auto text-center" : ""}`}>
       {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-      <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+      <h2 id={id} className="text-3xl font-extrabold leading-tight sm:text-4xl">
         {title}
       </h2>
-      {subtitle && (
-        <p className="mt-4 text-base text-brand-50/60 sm:text-lg">{subtitle}</p>
-      )}
-    </Reveal>
+      {lede && <p className="lede mt-4">{lede}</p>}
+    </div>
   );
 }

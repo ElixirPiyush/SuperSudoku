@@ -1,8 +1,11 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Brand tokens are sourced directly from the Super Sudoku Android app's default
- * "Neon Pulse" theme (lib/core/app_themes.dart) so web + app stay consistent.
+ * Brand tokens come from the Super Sudoku app's default theme
+ * (lib/core/design/app_colors.dart in the app): royal blue, navy, cyan and a
+ * gold accent used for league, stars and rewards. `brand`, `ink` and
+ * `surface` keep their old names so the online game (/play/) re-skins
+ * without touching its logic.
  */
 const config: Config = {
   content: [
@@ -13,69 +16,59 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Core brand palette (Neon Pulse)
         brand: {
-          DEFAULT: "#4FC3F7",
-          50: "#E3F7FF",
-          100: "#C7EEFF",
-          200: "#97D9FF",
-          300: "#8BE7FF",
-          400: "#4FC3F7",
-          500: "#0AB6FF",
-          600: "#0891D6",
-          700: "#0670A8",
-          800: "#054F75",
-          900: "#053352",
+          DEFAULT: "#003BDF", // app royal
+          50: "#EAF0FA", // app mist
+          100: "#D6E2FB",
+          200: "#AFC5F7",
+          300: "#7FA2F2",
+          400: "#4A7BEE",
+          500: "#2563EB", // app royalBright
+          600: "#003BDF",
+          700: "#002AC2", // app royalDeep
+          800: "#0B2A8F",
+          900: "#0B1446", // app navy
         },
         ink: {
-          DEFAULT: "#061229",
-          800: "#0C2B4F",
-          700: "#0D2748",
-          600: "#102040",
-          500: "#1B3354",
-          400: "#264D7D",
+          DEFAULT: "#050B24", // app darkBackground
+          800: "#0B1A45",
+          700: "#0B1446",
+          600: "#12245A",
+          500: "#1A2E6B",
+          400: "#2A3C78",
         },
         surface: {
-          DEFAULT: "#0D1C34",
-          card: "#102040",
+          DEFAULT: "#0B1A45",
+          card: "#12245A",
         },
+        gold: {
+          DEFAULT: "#FEC404",
+          50: "#FFF8DB",
+          100: "#FFEFAD",
+          400: "#FED33F",
+          500: "#FEC404",
+          700: "#8A6500", // app goldDeep (text on light)
+        },
+        cyan: { DEFAULT: "#01BEFB", 600: "#0089B8" },
+        page: "#F5F8FF", // app lightBackground
+        slate: { DEFAULT: "#4A5785" },
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
-        display: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        display: ["var(--font-jakarta)", "system-ui", "sans-serif"],
       },
       backgroundImage: {
-        "brand-gradient": "linear-gradient(135deg, #4FC3F7 0%, #0AB6FF 100%)",
-        "ink-gradient": "linear-gradient(160deg, #061229 0%, #0C2B4F 100%)",
-        "glow-radial":
-          "radial-gradient(circle at 50% 0%, rgba(79,195,247,0.25), transparent 60%)",
+        "hero-gradient":
+          "radial-gradient(1200px 500px at 85% -10%, rgba(1,190,251,0.22), transparent 60%), linear-gradient(160deg, #0B1446 0%, #0B2A8F 55%, #003BDF 100%)",
+        "royal-gradient": "linear-gradient(135deg, #2563EB 0%, #003BDF 55%, #002AC2 100%)",
+        "gold-gradient": "linear-gradient(135deg, #FFE27A 0%, #FEC404 60%, #F5A300 100%)",
       },
       boxShadow: {
-        glow: "0 0 40px rgba(79,195,247,0.35)",
-        "glow-sm": "0 0 20px rgba(79,195,247,0.25)",
-        card: "0 10px 40px -10px rgba(0,0,0,0.5)",
+        card: "0 1px 2px rgba(11,20,70,0.06), 0 8px 24px -12px rgba(11,20,70,0.18)",
+        lift: "0 20px 50px -20px rgba(11,20,70,0.45)",
+        glow: "0 0 40px rgba(37,99,235,0.35)",
       },
-      borderRadius: {
-        "2xl": "1.25rem",
-        "3xl": "1.75rem",
-      },
-      keyframes: {
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-12px)" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { opacity: "0.6" },
-          "50%": { opacity: "1" },
-        },
-        shimmer: {
-          "100%": { transform: "translateX(100%)" },
-        },
-      },
-      animation: {
-        float: "float 6s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 4s ease-in-out infinite",
-      },
+      borderRadius: { "2xl": "1.25rem", "3xl": "1.75rem" },
     },
   },
   plugins: [],

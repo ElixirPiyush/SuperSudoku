@@ -6,7 +6,8 @@
 export type Grid = number[]; // length 81, 0 == empty
 export type Difficulty = "easy" | "medium" | "hard" | "expert";
 
-// Number of cells to remove per difficulty (out of 81).
+// Number of cells to remove per difficulty (out of 81). Only used by the
+// fallback generator; normal play draws graded puzzles from public/puzzles/.
 export const DIFFICULTY_CLUES: Record<Difficulty, number> = {
   easy: 40,
   medium: 49,
@@ -15,10 +16,10 @@ export const DIFFICULTY_CLUES: Record<Difficulty, number> = {
 };
 
 export const DIFFICULTIES: { id: Difficulty; label: string; blurb: string }[] = [
-  { id: "easy", label: "Easy", blurb: "Relaxed solving with plenty of clues." },
-  { id: "medium", label: "Medium", blurb: "A balanced everyday brain workout." },
-  { id: "hard", label: "Hard", blurb: "Fewer clues, sharper logic required." },
-  { id: "expert", label: "Expert", blurb: "For seasoned Sudoku masters only." },
+  { id: "easy", label: "Easy", blurb: "Plenty of clues; every number can be found directly." },
+  { id: "medium", label: "Medium", blurb: "Fewer clues; some numbers need a look at a whole box." },
+  { id: "hard", label: "Hard", blurb: "Needs pairs and triples of candidates (use Notes)." },
+  { id: "expert", label: "Expert", blurb: "Needs advanced patterns such as the X-Wing." },
 ];
 
 function rowOf(i: number) {
@@ -154,4 +155,49 @@ export function isComplete(grid: Grid, solution: Grid): boolean {
     if (grid[i] !== solution[i]) return false;
   }
   return true;
+}
+
+/**
+ * Shuffle digits, rows within bands, bands, columns within stacks and stacks,
+ * and maybe transpose. The result is a different-looking puzzle with the same
+ * logic, so its difficulty grade is unchanged.
+ */
+export function transformPuzzle(puzzle: Grid, solution: Grid): Puzzle {
+  const digits = [0, ...shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9])];
+  const order = () => shuffle([0, 1, 2]).flatMap((band) => shuffle([0, 1, 2]).map((k) => band * 3 + k));
+  const rows = order();
+  const cols = order();
+  const transpose = Math.random() < 0.5;
+  const map = (g: Grid) =>
+    Array.from({ length: 81 }, (_, i) => {
+      let r = rows[rowOf(i)];
+      let c = cols[colOf(i)];
+      if (transpose) [r, c] = [c, r];
+      return digits[g[r * 9 + c]];
+    });
+  const p = map(puzzle);
+  return { puzzle: p, solution: map(solution), givens: p.map((v) => v !== 0) };
+}
+
+const bankCache = new Map<Difficulty, string[]>();
+
+/**
+ * A random graded puzzle from public/puzzles/<difficulty>.json (built by
+ * scripts/generate-puzzles.mjs), shuffled. Falls back to the local generator
+ * when the bank cannot be loaded.
+ */
+export async function loadPuzzle(difficulty: Difficulty): Promise<Puzzle> {
+  try {
+    let bank = bankCache.get(difficulty);
+    if (!bank) {
+      const res = await fetch(`/puzzles/${difficulty}.json`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      bank = (await res.json()) as string[];
+      bankCache.set(difficulty, bank);
+    }
+    const [p, s] = bank[Math.floor(Math.random() * bank.length)].split(":");
+    return transformPuzzle([...p].map(Number), [...s].map(Number));
+  } catch {
+    return generatePuzzle(difficulty);
+  }
 }

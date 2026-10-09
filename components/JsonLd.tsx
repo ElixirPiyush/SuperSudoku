@@ -1,51 +1,55 @@
-import { SITE, FAQS } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
-/** Structured data (schema.org) for rich results and SEO. */
-export default function JsonLd() {
-  const data = [
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: SITE.name,
-      url: SITE.url,
-      description: SITE.description,
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${SITE.url}/blog/?q={search_term_string}`,
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: SITE.name,
-      operatingSystem: "ANDROID",
-      applicationCategory: "GameApplication",
-      url: SITE.playUrl,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: SITE.rating,
-        ratingCount: 12000,
-        bestRating: 5,
-        worstRating: 1,
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: FAQS.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    },
-  ];
-
+/** Renders schema.org structured data. No ratings: only facts we can keep true. */
+export default function JsonLd({ data }: { data: object | object[] }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // Our own constant content; "<" is escaped so it can't close the tag.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }
+
+/** The publisher, Elixir Infotech. */
+const ORGANIZATION = {
+  "@type": "Organization",
+  name: SITE.developer,
+  logo: `${SITE.url}/images/elixir-infotech-512.png`,
+  email: SITE.email,
+  telephone: SITE.phone,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE.address.street,
+    addressLocality: SITE.address.city,
+    addressRegion: SITE.address.region,
+    postalCode: SITE.address.postalCode,
+    addressCountry: SITE.address.country,
+  },
+};
+
+/** Site-wide entities: the website, its publisher and the Android app. */
+export const SITE_JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: SITE.url,
+    description: SITE.description,
+    publisher: ORGANIZATION,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    name: SITE.storeTitle,
+    alternateName: SITE.name,
+    operatingSystem: "Android",
+    applicationCategory: "GameApplication",
+    applicationSubCategory: "Puzzle",
+    url: SITE.url,
+    installUrl: SITE.playUrl,
+    image: `${SITE.url}/images/app-icon-512.png`,
+    author: ORGANIZATION,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+];

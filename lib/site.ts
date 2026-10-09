@@ -1,118 +1,81 @@
 // -----------------------------------------------------------------------------
-// Central site configuration: brand, links, marketing content, SEO defaults.
-// Edit content here once and it propagates across every page/component.
+// Central site configuration. Every product fact on the site comes from here
+// or lib/content.ts, and each one is taken from the app's code (supersudoku
+// repo) or its Google Play listing. No ratings, download counts, testimonials
+// or player statistics are shown: they change, and invented ones mislead.
 // -----------------------------------------------------------------------------
 
 export const SITE = {
   name: "Super Sudoku",
-  tagline: "Play Free Sudoku Online & On Mobile",
+  /** The Google Play listing title. */
+  storeTitle: "Super Sudoku: Classic Puzzle",
+  tagline: "Daily Sudoku, Monthly League & Themes",
   description:
-    "Play free Sudoku online in your browser — easy, medium, hard & expert puzzles with notes, hints, undo and a daily challenge. Or download the Super Sudoku app for Android.",
+    "Super Sudoku for Android: Easy to Expert puzzles, a Daily Challenge, a Monthly League with a Top 100, nine themes and offline play. Free on Google Play.",
   url: "https://elixir-7482e.web.app",
   locale: "en_US",
-  twitter: "@supersudoku",
-  email: "piyushglsict@gmail.com",
+  email: "elixirinfotechindia@gmail.com",
+  developer: "Elixir Infotech",
+  /** Publisher's office (shown on Support, About and the legal pages). */
+  address: {
+    street: "Office No. 317, One Way, Sadguru Arcade, Dhebar Rd, near Jivan Commercial Complex, Raghuveer Para, Lohana Para",
+    city: "Rajkot",
+    region: "Gujarat",
+    postalCode: "360001",
+    country: "IN",
+  },
+  phone: "+91 90168 81593",
   playPackage: "com.elixir.sudoku.puzzlegame",
   playUrl:
     "https://play.google.com/store/apps/details?id=com.elixir.sudoku.puzzlegame",
-  rating: 4.7,
-  ratingCount: "12,000+",
-  ogImage: "/images/feature_graphic.png",
+  ogImage: "/images/og-image.png",
 };
 
+/** One-line postal address, e.g. for the Contact page. */
+export const ADDRESS_LINE = `${SITE.address.street}, ${SITE.address.city}, ${SITE.address.region} ${SITE.address.postalCode}, India`;
+
+/** `tel:` link for SITE.phone. */
+export const PHONE_HREF = `tel:${SITE.phone.replace(/\s/g, "")}`;
+
+/** Main navigation (header). */
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/play/", label: "Play Online" },
   { href: "/features/", label: "Features" },
-  { href: "/blog/", label: "Blog" },
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
+  { href: "/monthly-league/", label: "Monthly League" },
+  { href: "/daily-challenge/", label: "Daily Challenge" },
+  { href: "/themes/", label: "Themes" },
+  { href: "/how-to-play/", label: "How to Play" },
+  { href: "/faq/", label: "FAQ" },
 ];
 
-export const STATS = [
-  { value: 100000, suffix: "+", label: "Downloads" },
-  { value: 5000, suffix: "+", label: "Daily Players" },
-  { value: 4, suffix: "", label: "Difficulty Levels" },
-  { value: 100, suffix: "%", label: "Offline Capable" },
-];
-
-export const WHY_CHOOSE = [
+/** Footer groups. */
+export const FOOTER_LINKS = [
   {
-    icon: "Sparkles",
-    title: "Premium Game Design",
-    body: "The same polished board, themes and animations as our top-rated Android app — now in your browser.",
+    title: "The app",
+    links: [
+      { href: "/features/", label: "Features" },
+      { href: "/monthly-league/", label: "Monthly League" },
+      { href: "/daily-challenge/", label: "Daily Challenge" },
+      { href: "/themes/", label: "Themes" },
+    ],
   },
   {
-    icon: "Gauge",
-    title: "Blazing Fast",
-    body: "Built for performance with instant load times, smooth interactions and a 95+ Lighthouse score.",
+    title: "Learn & play",
+    links: [
+      { href: "/how-to-play/", label: "How to Play" },
+      { href: "/play/", label: "Play Online" },
+      { href: "/blog/", label: "Blog" },
+      { href: "/faq/", label: "FAQ" },
+    ],
   },
   {
-    icon: "WifiOff",
-    title: "Play Offline",
-    body: "Install the app and solve puzzles anywhere — no connection required, ever.",
-  },
-  {
-    icon: "Brain",
-    title: "Train Your Brain",
-    body: "Daily logic practice that sharpens focus, memory and problem-solving skills.",
-  },
-  {
-    icon: "Palette",
-    title: "Beautiful Themes",
-    body: "Eight hand-crafted themes from Neon Pulse to Sakura — match your mood.",
-  },
-  {
-    icon: "Trophy",
-    title: "Compete & Achieve",
-    body: "Google Play Games leaderboards, achievements and streaks keep you coming back.",
-  },
-];
-
-export const FEATURES = [
-  { icon: "CalendarDays", title: "Daily Challenge", body: "A fresh hand-picked puzzle every single day with global leaderboards." },
-  { icon: "BarChart3", title: "Statistics Tracking", body: "Track win rate, best times, streaks and progress across every difficulty." },
-  { icon: "Palette", title: "Multiple Themes", body: "Eight premium themes with light and dark variants for comfortable play." },
-  { icon: "Save", title: "Auto Save", body: "Never lose progress — every move is saved instantly and restored on return." },
-  { icon: "PencilLine", title: "Notes Mode", body: "Pencil in candidates just like on paper to plan your toughest moves." },
-  { icon: "Lightbulb", title: "Smart Hints", body: "Stuck? Reveal a logical next step without spoiling the whole board." },
-  { icon: "Award", title: "Achievements", body: "Unlock 14+ achievements from First Puzzle to Sudoku Legend." },
-  { icon: "Gamepad2", title: "Play Games Integration", body: "Sign in with Google Play Games to sync scores and climb leaderboards." },
-  { icon: "WifiOff", title: "Offline Play", body: "The full game works with zero internet connection." },
-  { icon: "TrendingUp", title: "Progress Tracking", body: "Watch your solving speed and accuracy improve over time." },
-];
-
-export const TESTIMONIALS = [
-  { name: "Aarav M.", role: "Daily player", quote: "The cleanest Sudoku I've played. The daily challenge is now part of my morning routine.", stars: 5 },
-  { name: "Sophie L.", role: "Puzzle enthusiast", quote: "Love the themes and how smooth everything feels. Notes mode is exactly like pen and paper.", stars: 5 },
-  { name: "Daniel K.", role: "Commuter", quote: "Offline play is a lifesaver on the subway. Hints are genuinely helpful, not cheaty.", stars: 5 },
-  { name: "Priya S.", role: "Brain-training fan", quote: "My solve times have dropped noticeably. The stats tracking keeps me motivated.", stars: 5 },
-];
-
-export const FAQS = [
-  {
-    q: "Is Super Sudoku free to play?",
-    a: "Yes. You can play unlimited Sudoku puzzles for free online in your browser, and the Android app is a free download.",
-  },
-  {
-    q: "Do I need to create an account?",
-    a: "No account is needed to play online. In the app you can optionally sign in with Google Play Games to sync leaderboards and achievements.",
-  },
-  {
-    q: "Can I play Sudoku offline?",
-    a: "The Android app works fully offline. The web version runs entirely in your browser and generates puzzles locally.",
-  },
-  {
-    q: "What difficulty levels are available?",
-    a: "Four levels: Easy, Medium, Hard and Expert. Every puzzle is generated with a guaranteed unique solution.",
-  },
-  {
-    q: "Is there a daily challenge?",
-    a: "Yes — the app features a new daily challenge puzzle each day with global leaderboards and streak tracking.",
-  },
-  {
-    q: "Does the web version save my progress?",
-    a: "Yes, your current game is auto-saved in your browser so you can pick up where you left off.",
+    title: "Company",
+    links: [
+      { href: "/about/", label: "About" },
+      { href: "/contact/", label: "Support" },
+      { href: "/privacy-policy/", label: "Privacy Policy" },
+      { href: "/terms/", label: "Terms of Service" },
+    ],
   },
 ];
 
@@ -198,28 +161,28 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "sudoku-brain-training-benefits",
-    title: "Can Sudoku Really Train Your Brain? The Science",
+    title: "Sudoku as a Daily Habit: What It Does (and Doesn't) Do",
     excerpt:
-      "Does solving Sudoku actually make you smarter? We look at what research says about puzzles and cognitive health.",
+      "What a daily Sudoku really practises, what it can't promise, and how to make it a habit you enjoy.",
     date: "2026-06-01",
-    readMins: 5,
-    category: "Brain Training",
+    readMins: 4,
+    category: "Daily Habit",
     body: [
       {
         paragraphs: [
-          "Sudoku is often marketed as 'brain training', but what does the evidence actually show? The honest answer: it's a genuinely good workout for specific skills.",
+          "Sudoku is often sold as 'brain training'. We prefer to be plain about it: Sudoku is a logic puzzle, and solving one practises the skills the puzzle itself uses. It is not a medical treatment and we make no health claims for it.",
         ],
       },
       {
-        heading: "What Sudoku improves",
+        heading: "What you practise",
         paragraphs: [
-          "Regular puzzle solving is associated with better working memory, sustained attention and logical reasoning. The act of holding candidates in mind while scanning the grid exercises the same circuits used in planning and focus.",
+          "Every grid asks you to scan rows, columns and boxes, keep a few candidate numbers in mind and rule options out step by step. Doing that regularly makes you faster and more systematic at Sudoku — the same way any game gets easier with practice.",
         ],
       },
       {
         heading: "Make it a habit",
         paragraphs: [
-          "Like any training, consistency matters more than intensity. A single daily puzzle — exactly what our Daily Challenge provides — is a sustainable way to keep your mind sharp.",
+          "A short puzzle every day is easier to keep up than a long session once a week. That is the idea behind the Daily Challenge in the Super Sudoku app: one puzzle a day, the same for everyone, with a streak that grows when you come back tomorrow.",
         ],
       },
     ],

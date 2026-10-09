@@ -11,7 +11,7 @@ export default function GooglePlayBadge({
       href={SITE.playUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Download Super Sudoku on Google Play"
+      aria-label="Get Super Sudoku on Google Play (opens in a new tab)"
       className={`inline-flex items-center gap-3 rounded-xl border border-white/15 bg-black px-5 py-2.5 transition-transform duration-200 hover:-translate-y-0.5 hover:border-white/30 ${className}`}
     >
       <svg width="26" height="28" viewBox="0 0 512 512" aria-hidden="true">

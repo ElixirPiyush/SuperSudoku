@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import StickyMobileCTA from "@/components/StickyMobileCTA";
-import JsonLd from "@/components/JsonLd";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
+import JsonLd, { SITE_JSON_LD } from "@/components/JsonLd";
 
-const poppins = Poppins({
+// Self-hosted at build time by next/font: no request to Google at runtime.
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-poppins",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -22,19 +22,7 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
-  keywords: [
-    "Sudoku",
-    "Sudoku Game",
-    "Sudoku Online",
-    "Free Sudoku",
-    "Daily Sudoku",
-    "Brain Training Game",
-    "Sudoku Puzzle",
-    "Sudoku Challenge",
-    "Classic Sudoku",
-    "Sudoku Offline",
-  ],
-  authors: [{ name: SITE.name }],
+  authors: [{ name: SITE.developer }],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -43,7 +31,7 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
-    images: [{ url: SITE.ogImage, width: 1024, height: 500, alt: SITE.name }],
+    images: [{ url: SITE.ogImage, width: 1024, height: 500, alt: "Super Sudoku: Daily Sudoku Challenge" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -53,27 +41,23 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   manifest: "/site.webmanifest",
+  other: { "google-play-app": `app-id=${SITE.playPackage}` },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#061229",
+  themeColor: "#0B1446",
   width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={poppins.variable}>
+    <html lang="en" className={jakarta.variable}>
       <body>
-        <JsonLd />
-        <Navbar />
+        <JsonLd data={SITE_JSON_LD} />
+        <SiteHeader />
         <main id="main">{children}</main>
-        <Footer />
-        <StickyMobileCTA />
+        <SiteFooter />
       </body>
     </html>
   );

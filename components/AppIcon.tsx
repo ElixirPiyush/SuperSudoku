@@ -1,6 +1,4 @@
-import Image from "next/image";
-
-/** The real Super Sudoku Android app launcher icon, used as the site logo. */
+/** The Super Sudoku app icon (from the Play listing), used as the site logo. */
 export default function AppIcon({
   size = 36,
   className = "",
@@ -9,12 +7,11 @@ export default function AppIcon({
   className?: string;
 }) {
   return (
-    <Image
-      src="/images/ic_launcher-playstore.png"
+    <img
+      src="/images/app-icon-192.png"
       alt="Super Sudoku app icon"
       width={size}
       height={size}
-      priority
       className={`rounded-xl ${className}`}
     />
   );

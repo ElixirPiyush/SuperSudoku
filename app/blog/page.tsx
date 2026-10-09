@@ -1,69 +1,46 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import { BLOG_POSTS } from "@/lib/site";
-import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
+import { pageMeta } from "@/lib/seo";
+import PageHero from "@/components/PageHero";
 
-export const metadata: Metadata = {
-  title: "Blog — Sudoku Tips, Strategies & Brain Training",
+export const metadata = pageMeta({
+  title: "Blog — Sudoku Tips and Strategies",
   description:
-    "Sudoku tips, advanced strategies, brain-training science and puzzle guides from the Super Sudoku team. Improve your solving skills.",
-  alternates: { canonical: "/blog/" },
-};
+    "Sudoku tips for beginners, advanced strategies like X-Wing and Swordfish, and how to build a daily puzzle habit, from the Super Sudoku team.",
+  path: "/blog/",
+});
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default function BlogPage() {
   const posts = [...BLOG_POSTS].sort((a, b) => b.date.localeCompare(a.date));
   return (
     <>
-      <section className="pt-28 sm:pt-32">
-        <div className="container-page">
-          <SectionHeading
-            eyebrow="Blog"
-            title="Tips, strategies & brain training"
-            subtitle="Level up your Sudoku game with guides from beginner basics to expert techniques."
-          />
-        </div>
-      </section>
-
-      <section className="section pt-12">
-        <div className="container-page grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, i) => (
-            <Reveal key={post.slug} delay={i * 0.05}>
-              <Link
-                href={`/blog/${post.slug}/`}
-                className="glass group flex h-full flex-col p-6 transition-transform duration-300 hover:-translate-y-1"
-              >
-                <span className="self-start rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand-300">
-                  {post.category}
-                </span>
-                <h2 className="mt-4 text-xl font-semibold text-white">
-                  {post.title}
-                </h2>
-                <p className="mt-2 flex-1 text-sm text-brand-50/60">
-                  {post.excerpt}
-                </p>
-                <div className="mt-5 flex items-center justify-between text-xs text-brand-50/50">
-                  <span>{formatDate(post.date)}</span>
+      <PageHero eyebrow="Blog" title="Sudoku tips and strategies" lede="Guides from beginner basics to expert techniques." />
+      <section className="section">
+        <ul className="container-page grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <li key={post.slug}>
+              <Link href={`/blog/${post.slug}/`} className="card group flex h-full flex-col p-6 transition-shadow hover:shadow-lift">
+                <span className="self-start rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">{post.category}</span>
+                <h2 className="mt-4 text-xl font-bold">{post.title}</h2>
+                <p className="mt-2 flex-1 text-sm text-slate">{post.excerpt}</p>
+                <div className="mt-5 flex items-center justify-between text-xs text-slate">
+                  <time dateTime={post.date}>{formatDate(post.date)}</time>
                   <span className="inline-flex items-center gap-1">
-                    <Clock size={12} /> {post.readMins} min read
+                    <Clock size={12} aria-hidden="true" /> {post.readMins} min read
                   </span>
                 </div>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm text-brand-300">
-                  Read article <ArrowRight size={14} />
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-brand-700 group-hover:underline">
+                  Read article <ArrowRight size={14} aria-hidden="true" />
                 </span>
               </Link>
-            </Reveal>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
     </>
   );

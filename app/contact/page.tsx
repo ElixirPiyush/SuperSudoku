@@ -1,82 +1,101 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, HelpCircle, Shield, FileText } from "lucide-react";
-import { SITE } from "@/lib/site";
-import SectionHeading from "@/components/SectionHeading";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { pageMeta } from "@/lib/seo";
+import { ADDRESS_LINE, PHONE_HREF, SITE } from "@/lib/site";
+import PageHero from "@/components/PageHero";
 import ContactForm from "@/components/ContactForm";
 
-export const metadata: Metadata = {
-  title: "Contact & Support",
+export const metadata = pageMeta({
+  title: "Support & Contact",
   description:
-    "Get in touch with the Super Sudoku team. Find support, FAQs, our privacy policy and terms & conditions.",
-  alternates: { canonical: "/contact/" },
-};
+    "Get help with Super Sudoku: troubleshooting for the Daily Challenge, Monthly League, rewards, ads and lost progress, and how to email support.",
+  path: "/contact/",
+});
+
+const HELP = [
+  {
+    q: "The Daily Challenge says \"Internet Required\"",
+    a: "Starting the Daily Challenge needs a working connection. Check Wi-Fi or mobile data, then tap Retry Connection. Regular puzzles still work offline.",
+    link: { href: "/faq/#daily", label: "About the Daily Challenge" },
+  },
+  {
+    q: "My score isn't on the league yet",
+    a: "If your connection dropped before you finished, the result is sent when you are back online (at app start, when you open the league, or when the connection returns). Only the first completion of a day counts.",
+    link: { href: "/monthly-league/#daily-score", label: "League scoring" },
+  },
+  {
+    q: "I reinstalled and my league score is gone",
+    a: "From version 1.0.23 the league is linked to your Google Play Games account: open Play Games in the app and sign in, then open the Monthly League again. In older versions the league account lived only on the phone, so a reinstall started a new entry.",
+    link: { href: "/faq/#progress", label: "Progress after a reinstall" },
+  },
+  {
+    q: "I can't see my reward",
+    a: "Rewards appear after the month has ended in every time zone, normally on the evening of the 1st (India time). Open the Monthly League screen in the app to claim it.",
+    link: { href: "/monthly-league/#rewards", label: "Rewards and claiming" },
+  },
+  {
+    q: "A video didn't give me my reward",
+    a: "Rewards from a video are given only when the video reports that it was watched to the end. If no video is available, try again in a few minutes.",
+    link: { href: "/faq/#ads", label: "Ads and videos" },
+  },
+];
 
 export default function ContactPage() {
   return (
     <>
-      <section className="pt-28 sm:pt-32">
-        <div className="container-page">
-          <SectionHeading
-            eyebrow="Contact"
-            title="We'd love to hear from you"
-            subtitle="Questions, feedback or bug reports — reach out and we'll get back to you."
-          />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Support"
+        title="How can we help?"
+        lede="Most questions are answered below. For anything else, email us and include your phone model, Android version and app version (Settings → About)."
+      >
+        <a href={`mailto:${SITE.email}`} className="btn bg-white text-brand-800 hover:bg-brand-50">
+          <Mail size={18} aria-hidden="true" /> {SITE.email}
+        </a>
+      </PageHero>
 
-      <section className="section pt-12">
-        <div className="container-page grid gap-8 lg:grid-cols-[1fr_340px]">
-          <ContactForm />
-
-          <aside className="space-y-4">
-            <a
-              href={`mailto:${SITE.email}`}
-              className="glass flex items-center gap-4 p-5 transition-transform hover:-translate-y-0.5"
-            >
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand/15 text-brand-300">
-                <Mail size={20} />
-              </span>
-              <div>
-                <div className="font-semibold text-white">Email support</div>
-                <div className="text-sm text-brand-50/60">{SITE.email}</div>
-              </div>
-            </a>
-
-            <LinkCard href="/#faq" icon={<HelpCircle size={20} />} title="FAQ" desc="Common questions answered" external={false} />
-            <LinkCard href="/privacy-policy/" icon={<Shield size={20} />} title="Privacy Policy" desc="How we handle your data" external={false} />
-            <LinkCard href="/terms/" icon={<FileText size={20} />} title="Terms & Conditions" desc="The rules of the road" external={false} />
-          </aside>
+      <section className="section">
+        <div className="container-page grid items-start gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <h2 className="text-2xl font-extrabold">Troubleshooting</h2>
+            <ul className="mt-6 space-y-4">
+              {HELP.map((h) => (
+                <li key={h.q} className="card p-5">
+                  <h3 className="font-bold">{h.q}</h3>
+                  <p className="mt-2 text-slate">{h.a}</p>
+                  <Link href={h.link.href} className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-brand-700 underline">
+                    {h.link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="lg:sticky lg:top-24">
+            <h2 className="text-2xl font-extrabold">Email support</h2>
+            <p className="mt-2 text-slate">
+              We read every message. For privacy requests (access or deletion of your data), choose &quot;Privacy request&quot; and
+              see our <Link href="/privacy-policy/" className="font-bold text-brand-700 underline">Privacy Policy</Link>.
+            </p>
+            <div className="mt-6">
+              <ContactForm />
+            </div>
+            <address className="card mt-6 space-y-3 p-5 not-italic">
+              <p className="font-bold text-brand-900">{SITE.developer}</p>
+              <p className="flex gap-3 text-slate">
+                <MapPin size={18} className="mt-0.5 shrink-0 text-brand-700" aria-hidden="true" />
+                <span>{ADDRESS_LINE}</span>
+              </p>
+              <p className="flex items-center gap-3">
+                <Phone size={18} className="shrink-0 text-brand-700" aria-hidden="true" />
+                <a href={PHONE_HREF} className="inline-flex min-h-11 items-center font-bold text-brand-700 underline">{SITE.phone}</a>
+              </p>
+              <p className="flex items-center gap-3">
+                <Mail size={18} className="shrink-0 text-brand-700" aria-hidden="true" />
+                <a href={`mailto:${SITE.email}`} className="inline-flex min-h-11 items-center font-bold text-brand-700 underline break-all">{SITE.email}</a>
+              </p>
+            </address>
+          </div>
         </div>
       </section>
     </>
-  );
-}
-
-function LinkCard({
-  href,
-  icon,
-  title,
-  desc,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-  external: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className="glass flex items-center gap-4 p-5 transition-transform hover:-translate-y-0.5"
-    >
-      <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand/15 text-brand-300">
-        {icon}
-      </span>
-      <div>
-        <div className="font-semibold text-white">{title}</div>
-        <div className="text-sm text-brand-50/60">{desc}</div>
-      </div>
-    </Link>
   );
 }

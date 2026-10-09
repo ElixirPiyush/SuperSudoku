@@ -1,82 +1,65 @@
-import type { Metadata } from "next";
-import { Target, Eye, Heart, Brain } from "lucide-react";
-import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
-import { SITE } from "@/lib/site";
+import Link from "next/link";
+import { pageMeta } from "@/lib/seo";
+import { ADDRESS_LINE, SITE } from "@/lib/site";
+import PageHero from "@/components/PageHero";
+import CtaBand from "@/components/CtaBand";
 
-export const metadata: Metadata = {
-  title: "About — Our Mission to Make Sudoku Delightful",
+export const metadata = pageMeta({
+  title: "About Super Sudoku",
   description:
-    "Learn about Super Sudoku: our mission, vision and why we build the most polished, brain-training Sudoku experience for players around the world.",
-  alternates: { canonical: "/about/" },
-};
+    "Super Sudoku is a free Sudoku game for Android by Elixir Infotech: a clean classic puzzle with a Daily Challenge, a Monthly League and themes.",
+  path: "/about/",
+});
 
 const VALUES = [
-  {
-    icon: Target,
-    title: "Our Mission",
-    body: "To make the timeless game of Sudoku more delightful, accessible and beautiful than ever — for everyone, on every device.",
-  },
-  {
-    icon: Eye,
-    title: "Our Vision",
-    body: "A world where a few minutes of daily logic practice is a joy, not a chore — helping millions keep their minds sharp.",
-  },
-  {
-    icon: Heart,
-    title: "Why Super Sudoku",
-    body: "We obsess over the details: buttery animations, thoughtful hints, gorgeous themes and a board that just feels right.",
-  },
-  {
-    icon: Brain,
-    title: "Brain Training",
-    body: "Sudoku exercises working memory, focus and logical reasoning. Our daily challenge makes consistency effortless.",
-  },
+  { title: "A clean classic", body: "Sudoku needs a clear board, readable numbers and tools that stay out of the way. Everything else is optional." },
+  { title: "A reason to return", body: "One shared puzzle a day and a fresh league every month give the habit a shape, without pressure." },
+  { title: "Fair and honest", body: "Scores are calculated on our server, rewards are ad-free time with no cash value, and we publish how ranking works." },
 ];
 
 export default function AboutPage() {
   return (
     <>
-      <section className="pt-28 sm:pt-32">
-        <div className="container-page">
-          <SectionHeading
-            eyebrow="About Us"
-            title="Crafting the world's most enjoyable Sudoku"
-            subtitle={`${SITE.name} started with a simple belief: a classic puzzle deserves a modern, premium experience.`}
-          />
-        </div>
-      </section>
-
-      <section className="section pt-12">
-        <div className="container-page grid gap-6 sm:grid-cols-2">
-          {VALUES.map((v, i) => (
-            <Reveal key={v.title} delay={i * 0.06}>
-              <div className="glass h-full p-8">
-                <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-brand/15 text-brand-300">
-                  <v.icon size={22} />
-                </div>
-                <h2 className="text-xl font-semibold text-white">{v.title}</h2>
-                <p className="mt-2 text-brand-50/65">{v.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="section pt-0">
-        <div className="container-page">
-          <Reveal className="glass mx-auto max-w-3xl p-10 text-center">
-            <h2 className="text-2xl font-bold text-white">The Brain-Training Benefits</h2>
-            <p className="mt-4 text-brand-50/70">
-              Research links regular puzzle solving with improved working memory,
-              sustained attention and logical reasoning. By holding candidate
-              numbers in mind while scanning the grid, you exercise the same
-              cognitive circuits used for planning and focus. {SITE.name} is built
-              to make that practice a daily pleasure rather than a task.
+      <PageHero
+        eyebrow="About"
+        title="A classic puzzle, made for every day"
+        lede={`${SITE.name} is a free Sudoku game for Android, made by ${SITE.developer} in India.`}
+      />
+      <section className="section">
+        <div className="container-page grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+          <div className="lede space-y-4">
+            <p>
+              We started {SITE.name} because we wanted a Sudoku that looks good, plays fast and respects your time. Since then the
+              app has grown a Daily Challenge, a Monthly League with a Top 100, nine themes and support for 12 languages (from
+              version 1.0.23).
             </p>
-          </Reveal>
+            <p>
+              The game is free and supported by ads. We keep ads to formats you can expect: an ad when the app opens, and short
+              videos that you choose to watch in return for something useful. League winners can switch ads off entirely.
+            </p>
+            <div className="flex items-center gap-4 rounded-2xl border border-brand-100 bg-white p-4">
+              <img src="/images/elixir-infotech-128.webp" alt="Elixir Infotech logo" width={105} height={128} className="h-14 w-auto" />
+              <p className="text-base">
+                <span className="block font-bold text-brand-900">{SITE.developer}</span>
+                <span className="block text-slate">Developer of {SITE.name}</span>
+                <span className="mt-1 block text-sm text-slate">{ADDRESS_LINE}</span>
+              </p>
+            </div>
+            <p>
+              Questions or ideas? <Link href="/contact/" className="font-bold text-brand-700 underline">Write to us</Link>.
+            </p>
+          </div>
+          <ul className="grid gap-5">
+            {VALUES.map((v) => (
+              <li key={v.title} className="card p-6">
+                <h2 className="text-xl font-bold">{v.title}</h2>
+                <p className="mt-2 text-slate">{v.body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
+      <CtaBand />
     </>
   );
 }

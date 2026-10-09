@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Star } from "lucide-react";
+import { X } from "lucide-react";
 import { SITE } from "@/lib/site";
 import GooglePlayBadge from "./GooglePlayBadge";
 import AppIcon from "./AppIcon";
@@ -42,11 +42,11 @@ export default function InstallPromptModal() {
       aria-modal="true"
       aria-labelledby="install-title"
     >
-      <div className="glass relative w-full max-w-md p-8 text-center">
+      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-brand-900 p-8 text-center shadow-lift">
         <button
           onClick={dismiss}
           aria-label="Close"
-          className="absolute right-4 top-4 text-brand-50/50 hover:text-white"
+          className="absolute right-2 top-2 grid h-11 w-11 place-items-center rounded-full text-brand-50/50 hover:bg-white/10 hover:text-white"
         >
           <X size={20} />
         </button>
@@ -55,22 +55,14 @@ export default function InstallPromptModal() {
           Loving the puzzles?
         </h2>
         <p className="mt-2 text-brand-50/70">
-          Take {SITE.name} everywhere. Get the daily challenge, achievements,
-          themes and full offline play — free on Android.
+          Take {SITE.name} everywhere. Get the Daily Challenge, the Monthly League,
+          nine themes and offline play — free on Android.
         </p>
-        <div className="mt-3 flex items-center justify-center gap-1 text-brand-300">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={16} fill="currentColor" />
-          ))}
-          <span className="ml-1 text-sm text-brand-50/70">
-            {SITE.rating} • {SITE.ratingCount} ratings
-          </span>
-        </div>
         <div className="mt-6 flex flex-col items-center gap-3">
           <GooglePlayBadge />
           <button
             onClick={dismiss}
-            className="text-sm text-brand-50/50 hover:text-white"
+            className="min-h-11 px-4 text-sm text-brand-50/50 hover:text-white"
           >
             Maybe later
           </button>

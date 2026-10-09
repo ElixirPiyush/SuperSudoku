@@ -2,60 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-poppins: "Poppins", system-ui, sans-serif;
-}
-
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
+  :root { color-scheme: light; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
-    @apply bg-ink text-brand-50 antialiased;
-    background-image: radial-gradient(
-        circle at 20% -10%,
-        rgba(79, 195, 247, 0.18),
-        transparent 45%
-      ),
-      radial-gradient(circle at 90% 10%, rgba(10, 182, 255, 0.12), transparent 40%);
-    background-attachment: fixed;
+    @apply bg-page font-sans text-brand-900 antialiased;
+    text-rendering: optimizeLegibility;
   }
-  ::selection {
-    @apply bg-brand/30 text-white;
-  }
+  h1, h2, h3, h4 { @apply font-display tracking-tight text-brand-900; }
+  a { @apply underline-offset-4; }
+  :focus-visible { @apply outline-none ring-2 ring-offset-2 ring-brand-500 ring-offset-white; }
+  ::selection { background: #FEC404; color: #0B1446; }
+  img { max-width: 100%; height: auto; }
 }
 
 @layer components {
-  .container-page {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
-  }
+  .container-page { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8; }
+  .section { @apply py-16 sm:py-20 lg:py-24; }
+  .eyebrow { @apply mb-3 inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-700; }
+  .eyebrow-dark { @apply mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-gold; }
+  .card { @apply rounded-2xl border border-brand-100 bg-white shadow-card; }
+  .lede { @apply text-lg leading-relaxed text-slate; }
+  .btn { @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-colors duration-200; }
+  .btn-primary { @apply btn bg-brand text-white hover:bg-brand-700; }
+  .btn-ghost { @apply btn border border-brand-200 bg-white text-brand-700 hover:border-brand-400 hover:bg-brand-50; }
+  .btn-ghost-dark { @apply btn border border-white/25 text-white hover:bg-white/10; }
+  .prose-legal h2 { @apply mt-10 text-xl font-bold; }
+  .prose-legal h3 { @apply mt-6 font-bold; }
+  .prose-legal p, .prose-legal li { @apply mt-3 leading-relaxed text-slate; }
+  .prose-legal ul { @apply mt-2 list-disc space-y-1 pl-6; }
+  .prose-legal a { @apply font-semibold text-brand-700 underline; }
+  /* Kept for the online game (/play/), which sits on a navy panel. */
+  .glass { @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur; }
+  .gradient-text { @apply bg-gradient-to-r from-brand-300 to-cyan bg-clip-text text-transparent; }
+  .btn-secondary { @apply btn-ghost-dark; }
+}
 
-  /* Glassmorphism card */
-  .glass {
-    @apply rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-md;
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-  }
-
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink;
-  }
-  .btn-primary {
-    @apply btn bg-brand-gradient text-ink shadow-glow-sm hover:shadow-glow hover:-translate-y-0.5;
-  }
-  .btn-secondary {
-    @apply btn border border-brand/40 bg-white/5 text-brand-50 hover:bg-white/10 hover:-translate-y-0.5;
-  }
-
-  .gradient-text {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #4fc3f7 0%, #0ab6ff 100%);
-  }
-
-  .section {
-    @apply py-16 sm:py-24;
-  }
-
-  .eyebrow {
-    @apply mb-3 inline-block rounded-full border border-brand/30 bg-brand/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300;
-  }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

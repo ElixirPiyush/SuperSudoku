@@ -1,17 +1,13 @@
 {
   "name": "Super Sudoku",
   "short_name": "Super Sudoku",
-  "description": "Play free Sudoku online and on Android.",
+  "description": "Daily Sudoku, a Monthly League and nine themes. Free for Android.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#061229",
-  "theme_color": "#061229",
+  "background_color": "#F5F8FF",
+  "theme_color": "#0B1446",
   "icons": [
-    {
-      "src": "/images/ic_launcher-playstore.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/images/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/app-icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }

@@ -1,355 +1,257 @@
-import type { Metadata } from "next";
-import { SITE } from "@/lib/site";
+import Link from "next/link";
+import { pageMeta } from "@/lib/seo";
+import { ADDRESS_LINE, PHONE_HREF, SITE } from "@/lib/site";
+import LegalPage, { LegalSection } from "@/components/LegalPage";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Privacy Policy",
   description:
-    "How Super Sudoku collects, uses and shares information across the app and website, including advertising through Google AdMob and Meta Audience Network.",
-  alternates: { canonical: "/privacy-policy/" },
-};
+    "How Super Sudoku collects, uses and shares information: the Monthly League and leaderboard, Firebase, Google Play Games, and advertising through Google AdMob and Meta Audience Network.",
+  path: "/privacy-policy/",
+});
+
+const TOC = [
+  { id: "collect", label: "1. Information we collect" },
+  { id: "league", label: "2. Monthly League and leaderboard" },
+  { id: "use", label: "3. How we use information" },
+  { id: "ads", label: "4. Advertising" },
+  { id: "consent", label: "5. Consent (Google UMP)" },
+  { id: "services", label: "6. Third-party services" },
+  { id: "sharing", label: "7. How information is shared" },
+  { id: "retention", label: "8. Data retention" },
+  { id: "rights", label: "9. Your rights" },
+  { id: "children", label: "10. Children" },
+  { id: "security", label: "11. Security" },
+  { id: "website", label: "12. This website" },
+  { id: "changes", label: "13. Changes" },
+  { id: "contact", label: "14. Contact" },
+];
 
 export default function PrivacyPage() {
   return (
-    <div className="pt-28 sm:pt-32">
-      <article className="container-page prose-legal mx-auto max-w-3xl pb-20">
-        <h1 className="text-3xl font-extrabold tracking-tight">Privacy Policy</h1>
-        <p className="mt-2 text-sm text-brand-50/50">
-          Last updated: 16 September 2026
+    <LegalPage
+      title="Privacy Policy"
+      updated="9 October 2026"
+      toc={TOC}
+      intro={
+        <>
+          <p>
+            This Privacy Policy explains how {SITE.name} (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;), developed by {SITE.developer},
+            collects, uses, shares and protects information when you use the {SITE.name} app for Android (Google Play package{" "}
+            <span className="whitespace-nowrap">{SITE.playPackage}</span>) and this website (together, the &quot;Service&quot;).
+          </p>
+          <p>
+            You do not need to sign up or give us your name, email address or phone number to play. The app does use an
+            anonymous account for the Monthly League, it can link that account to Google Play Games if you sign in, it shows a
+            display name on a public leaderboard, and it is supported by advertising. This policy explains each of these.
+          </p>
+        </>
+      }
+    >
+      <LegalSection id="collect" title="1. Information we collect">
+        <p><strong>Information you provide.</strong></p>
+        <ul>
+          <li>Your league <strong>display name</strong> and <strong>country</strong> if you change them (see section 2).</li>
+          <li><strong>Feedback</strong> you send from the app: a star rating, any text you type, the app version and the time.</li>
+          <li>The content of any <strong>email</strong> you send us, and the address you send it from.</li>
+        </ul>
+        <p><strong>Collected automatically.</strong> When you use the app, we and our service providers may collect:</p>
+        <ul>
+          <li>Device and technical information: device model and manufacturer, Android version, screen size, language, country and time zone, network type</li>
+          <li>App information: app version and build, installation and session identifiers, approximate time and length of sessions</li>
+          <li>Gameplay and usage data: puzzles started and completed, difficulty, hints, undos, mistakes, solve times, streaks, achievements and Daily Challenge participation</li>
+          <li>Advertising identifiers: your Android Advertising ID and similar identifiers used to select, deliver, cap and measure ads</li>
+          <li>Diagnostics: crash reports, stack traces and performance data</li>
+        </ul>
+        <p>
+          <strong>Stored only on your device.</strong> Your regular puzzle progress, statistics, theme, sound, language and other
+          settings are kept in the app&apos;s local storage. They are not uploaded to us and are removed when you uninstall the app or
+          clear its data.
         </p>
+      </LegalSection>
 
-        <p className="mt-6 text-brand-50/75">
-          This Privacy Policy explains how {SITE.name} (&quot;we&quot;,
-          &quot;our&quot;, or &quot;us&quot;) collects, uses, shares and protects
-          information when you use the {SITE.name} mobile application for Android
-          and this website (together, the &quot;Service&quot;). The app is
-          distributed on Google Play as{" "}
-          <span className="whitespace-nowrap">{SITE.playPackage}</span>.
+      <LegalSection id="league" title="2. Monthly League and leaderboard">
+        <p>
+          The Monthly League runs on our servers (Google Firebase: Authentication, Cloud Firestore and Cloud Functions). To take
+          part, the app creates an <strong>anonymous Firebase account</strong> on your device. It is identified by a random user ID
+          and contains no name, email or phone number.
         </p>
-        <p className="mt-4 text-brand-50/75">
-          We do not ask you to create an account, and we do not knowingly collect
-          your name, address or phone number. The app is, however, supported by
-          advertising, and advertising involves sharing limited device and
-          identifier data with our advertising partners. This policy sets out
-          exactly what that means.
+        <p>
+          <strong>Google Play Games link (app version 1.0.23 and later).</strong> If you are signed in to Google Play Games, the app
+          links your league account to your Play Games account, so your league progress can be restored after a reinstall or on
+          another device. For this, Google issues a one-time code that Firebase Authentication uses to verify your Play Games
+          account; Firebase then stores your Play Games player identifier with your league account. We do not receive your Google
+          password or email address. If you do not sign in to Play Games, no link is made.
         </p>
-
-        <Section title="1. Information We Collect">
-          <p>
-            <strong>Information you provide.</strong> If you email us, or submit
-            feedback from inside the app, we receive the contents of that message
-            and the email address you send it from.
-          </p>
-          <p>
-            <strong>Game and device information collected automatically.</strong>{" "}
-            When you use the app we and our service providers may collect:
-          </p>
-          <ul>
-            <li>
-              Device and technical information — device model, manufacturer,
-              operating system version, screen characteristics, language, country
-              and time zone, and mobile network or connection type
-            </li>
-            <li>
-              App information — app version and build, installation and session
-              identifiers, and the approximate time and length of your sessions
-            </li>
-            <li>
-              Gameplay and usage data — puzzles started and completed, difficulty
-              selected, hints and undos used, mistakes made, solve times, streaks,
-              achievements and daily-challenge participation
-            </li>
-            <li>
-              Advertising identifiers — your Android Advertising ID (AAID) and
-              similar identifiers used to select, deliver, cap and measure ads
-            </li>
-            <li>
-              Diagnostics — crash reports, stack traces, and performance and
-              stability data
-            </li>
-          </ul>
-          <p>
-            <strong>Stored on your device only.</strong> Your puzzle progress,
-            statistics, theme, sound, language and other settings are saved in
-            local storage on your device. This data is not uploaded to us and is
-            removed when you uninstall the app.
-          </p>
-        </Section>
-
-        <Section title="2. How We Use Information">
-          <ul>
-            <li>To provide, operate and maintain the game</li>
-            <li>To save your progress, statistics and preferences</li>
-            <li>To display advertising and to measure and cap how often ads are shown</li>
-            <li>To understand which features are used so we can improve them</li>
-            <li>To diagnose crashes, fix bugs and improve performance and stability</li>
-            <li>To detect and prevent fraud, invalid traffic and abuse of the Service</li>
-            <li>To comply with legal obligations and platform policies</li>
-          </ul>
-        </Section>
-
-        <Section title="3. Advertising">
-          <p>
-            The app is free and is funded by advertising. Ads are served through{" "}
-            <strong>Google AdMob</strong>, and we use{" "}
-            <strong>AdMob Mediation</strong> so that more than one advertising
-            network can compete to fill each ad request. The formats we show are
-            app open ads, rewarded ads (which you always choose to watch in
-            exchange for an in-game reward such as a bonus hint) and, where
-            enabled, interstitial ads. We do not show banner ads.
-          </p>
-          <p>
-            Through AdMob Mediation, ad requests may be sent to{" "}
-            <strong>Meta Audience Network</strong> in addition to the Google
-            AdMob network. When Meta Audience Network takes part in the auction
-            for an ad request or serves an ad to you,{" "}
-            <strong>
-              Meta Platforms, Inc. receives and processes data as an independent
-              controller of that data
-            </strong>
-            . That data can include your advertising identifier, IP address,
-            device and app information, and information about the ad shown and
-            how you interacted with it. Meta uses it to select and deliver ads,
-            to measure their performance and to combat fraud. Meta&apos;s handling
-            of that data is governed by its own terms, which you can read in the{" "}
-            <a
-              href="https://www.facebook.com/about/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand-300 underline"
-            >
-              Meta Privacy Policy
-            </a>{" "}
-            and the{" "}
-            <a
-              href="https://www.facebook.com/legal/terms/businesstools"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand-300 underline"
-            >
-              Meta Business Tools Terms
-            </a>
-            .
-          </p>
-          <p>
-            <strong>Personalised and non-personalised ads.</strong> Personalised
-            ads use your advertising identifier and inferred interests to make the
-            ads you see more relevant. Non-personalised ads are targeted using
-            only contextual information such as the app you are using and your
-            coarse location; they still use identifiers for frequency capping,
-            aggregated reporting and fraud prevention. Which of the two you
-            receive depends on your consent choice and on the privacy laws that
-            apply where you are.
-          </p>
-          <p>
-            <strong>Your controls.</strong> On Android you can reset or delete
-            your advertising ID, and opt out of ad personalisation, under{" "}
-            <em>Settings → Privacy → Ads</em>. Deleting your advertising ID stops
-            ads being personalised, but does not stop ads being shown.
-          </p>
-        </Section>
-
-        <Section title="4. Consent (Google UMP)">
-          <p>
-            We manage advertising consent with{" "}
-            <strong>
-              Google&apos;s User Messaging Platform (UMP), the consent management
-              platform built into the Google Mobile Ads SDK
-            </strong>
-            . Where consent is legally required — in particular for users in the
-            European Economic Area, the United Kingdom and Switzerland — the app
-            presents a consent form before any ad is requested, and your choice is
-            recorded and stored on your device.
-          </p>
-          <ul>
-            <li>
-              <strong>No ads before consent.</strong> The app does not initialise
-              the ads SDK or request any ad until the consent flow has completed
-              and has confirmed that ad requests are permitted.
-            </li>
-            <li>
-              <strong>Your choice is remembered.</strong> You are not asked again
-              on every launch. You can change or withdraw your choice at any time
-              from <em>Settings → Ad Privacy Settings</em> in the app, where the
-              consent form is available again.
-            </li>
-            <li>
-              <strong>Where consent is not required</strong> by local law, no
-              consent form is shown and ads are served in line with this policy
-              and the platform&apos;s own advertising controls.
-            </li>
-          </ul>
-          <p>
-            Consent covers Google and the advertising partners disclosed in the
-            consent form, including Meta Audience Network where it is an
-            authorised partner for your region.
-          </p>
-        </Section>
-
-        <Section title="5. Analytics, Crash Reporting and Other Services">
-          <p>
-            We use the following third-party services. Each has its own privacy
-            policy, and we recommend reading them:
-          </p>
-          <ul>
-            <li>
-              <strong>Google AdMob</strong> — advertising and AdMob Mediation
-            </li>
-            <li>
-              <strong>Meta Audience Network</strong> — advertising, via AdMob
-              Mediation
-            </li>
-            <li>
-              <strong>Google Firebase Analytics</strong> — aggregated usage and
-              engagement measurement
-            </li>
-            <li>
-              <strong>Firebase Crashlytics</strong> — crash and stability
-              reporting
-            </li>
-            <li>
-              <strong>Firebase Remote Config</strong> — remote feature
-              configuration
-            </li>
-            <li>
-              <strong>Cloud Firestore</strong> — storage of feedback you choose to
-              submit
-            </li>
-            <li>
-              <strong>Google Play Games Services</strong> — optional sign-in for
-              leaderboards, achievements and saved progress
-            </li>
-            <li>
-              <strong>Google Play Services and the Google Play Store</strong> —
-              app distribution, updates and in-app review prompts
-            </li>
-          </ul>
-          <p>
-            Google Play Games Services is optional. If you do not sign in, no
-            Play Games profile information is associated with your use of the app.
-          </p>
-        </Section>
-
-        <Section title="6. How Information Is Shared">
-          <p>
-            We do not sell your personal information. We share information only:
-          </p>
-          <ul>
-            <li>
-              with the advertising, analytics and infrastructure providers listed
-              above, so they can perform those functions
-            </li>
-            <li>
-              where you have consented, or where sharing is otherwise permitted by
-              the law that applies to you
-            </li>
-            <li>
-              to comply with a legal obligation, court order or enforceable
-              governmental request
-            </li>
-            <li>
-              to protect the rights, safety or property of our users, the public
-              or us
-            </li>
-          </ul>
-          <p>
-            Our providers operate globally, so information may be processed in
-            countries other than your own, including the United States. Where
-            required, those transfers rely on safeguards such as the European
-            Commission&apos;s standard contractual clauses.
-          </p>
-        </Section>
-
-        <Section title="7. Data Retention">
-          <p>
-            Progress and settings remain on your device until you clear the
-            app&apos;s data or uninstall it. Crash reports and analytics data are
-            retained by Google for the periods set out in their documentation and
-            in our project configuration. Feedback you submit is retained until it
-            is no longer needed to answer you. Advertising data is retained by the
-            relevant ad network under its own policy.
-          </p>
-        </Section>
-
-        <Section title="8. Your Rights">
-          <p>
-            Depending on where you live — in particular under the GDPR and UK GDPR
-            in Europe, and under laws such as the CCPA/CPRA in parts of the United
-            States — you may have the right to:
-          </p>
-          <ul>
-            <li>access the personal data held about you</li>
-            <li>have inaccurate data corrected</li>
-            <li>have your data deleted</li>
-            <li>restrict or object to certain processing, including profiling for advertising</li>
-            <li>receive your data in a portable form</li>
-            <li>withdraw consent at any time, without affecting processing already carried out</li>
-            <li>opt out of the &quot;sale&quot; or &quot;sharing&quot; of personal information for cross-context behavioural advertising</li>
-            <li>lodge a complaint with your local data protection authority</li>
-          </ul>
-          <p>
-            To exercise any of these rights, email us at{" "}
-            <a href={`mailto:${SITE.email}`} className="text-brand-300 underline">
-              {SITE.email}
-            </a>
-            . You can withdraw or change advertising consent yourself at any time
-            from <em>Settings → Ad Privacy Settings</em> in the app. Because the
-            app has no accounts, we may need additional information to identify
-            the data associated with your device before we can act on a request.
-          </p>
-        </Section>
-
-        <Section title="9. Children's Privacy">
-          <p>
-            The Service is not directed to children under 13, and we do not
-            knowingly collect personal information from them. The app is not
-            listed in Google Play&apos;s Designed for Families programme. If you
-            believe a child has provided us with personal information, contact us
-            and we will delete it.
-          </p>
-        </Section>
-
-        <Section title="10. Data Security">
-          <p>
-            We use commercially reasonable measures to protect information,
-            including encrypted transport (HTTPS/TLS) for data in transit and the
-            access controls provided by our infrastructure providers. No method of
-            transmission or storage is completely secure, so we cannot guarantee
-            absolute security.
-          </p>
-        </Section>
-
-        <Section title="11. Changes to This Privacy Policy">
-          <p>
-            We may update this policy from time to time. The revised version will
-            be posted on this page with a new &quot;Last updated&quot; date, and
-            significant changes will be highlighted in the app or on this website.
-          </p>
-        </Section>
-
-        <Section title="12. Contact Us">
-          <p>
-            For any question about this Privacy Policy, about how your data is
-            handled, or to exercise your rights, contact {SITE.name} at{" "}
-            <a href={`mailto:${SITE.email}`} className="text-brand-300 underline">
-              {SITE.email}
-            </a>
-            .
-          </p>
-        </Section>
-
-        <p className="mt-10 text-sm text-brand-50/50">
-          © {new Date().getFullYear()} {SITE.name}. All rights reserved.
+        <p>For each player we store on our servers:</p>
+        <ul>
+          <li>Your user ID, display name and country code (if any)</li>
+          <li>Each Daily Challenge you complete: the date, your solved board (checked and not kept), time taken, mistakes, hints, score and stars</li>
+          <li>Monthly totals: Monthly Score, days played, streaks, Streak Shield use, rank, badges and rewards</li>
+          <li>Your ad-free end date from league rewards, and the time-zone offset used for your league days in each month</li>
+          <li>For fair play: a note when a puzzle is solved unusually fast (user ID, date and solve time), reviewed only by us</li>
+        </ul>
+        <p>
+          <strong>Display name and country.</strong> Your display name starts as &quot;Player&quot; plus five characters of your user ID,
+          or your Play Games name if you are signed in. The country is detected on your device from your SIM, mobile network and
+          time zone, without location permission. You can change your name, choose another country or hide your flag at any time
+          on the league screen.
         </p>
-      </article>
-    </div>
-  );
-}
+        <p>
+          <strong>What other players see.</strong> On the leaderboard and in the Top 100, the app shows other players your display
+          name, country flag (unless hidden), Monthly Score, days played and rank. Your monthly leaderboard entry (display name,
+          flag, random user ID, daily scores and stars, streak and rank) is stored so that signed-in app users can read it; your
+          daily records, ad-free time and league history are readable only by you.
+        </p>
+      </LegalSection>
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-8 space-y-3 text-brand-50/75 [&_li]:ml-5 [&_li]:list-disc [&_ul]:space-y-1">
-      <h2 className="text-xl font-semibold text-white">{title}</h2>
-      {children}
-    </section>
+      <LegalSection id="use" title="3. How we use information">
+        <ul>
+          <li>To provide the game, the Daily Challenge and the Monthly League, calculate scores and ranks, and deliver rewards</li>
+          <li>To save your progress, statistics and preferences</li>
+          <li>To show advertising and to measure and cap how often ads are shown</li>
+          <li>To understand which features are used so we can improve them</li>
+          <li>To diagnose crashes and improve performance and stability</li>
+          <li>To keep the league fair and to detect and prevent fraud, invalid ad traffic and abuse</li>
+          <li>To answer your messages and to comply with legal obligations and platform policies</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection id="ads" title="4. Advertising">
+        <p>
+          The app is free and funded by advertising, served through <strong>Google AdMob</strong>. We use AdMob Mediation so that
+          more than one advertising network can compete to fill each ad request. The formats are app open ads, rewarded ads and
+          rewarded interstitial ads (which you choose to watch for something in return, such as a bonus hint, a new theme, opening
+          the Top 100 or claiming a league reward) and, where enabled, interstitial ads. We do not show banner ads. While you have
+          ad-free time from a league reward, no ads are shown.
+        </p>
+        <p>
+          Through AdMob Mediation, ad requests may be sent to <strong>Meta Audience Network</strong>. When Meta takes part in the
+          auction or serves an ad, Meta Platforms, Inc. receives and processes data as an independent controller, including your
+          advertising identifier, IP address, device and app information, and information about the ad and your interaction with
+          it, to deliver and measure ads and to combat fraud, under the{" "}
+          <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer">Meta Privacy Policy</a>.
+        </p>
+        <p>
+          <strong>Personalised and non-personalised ads.</strong> Personalised ads use your advertising identifier and inferred
+          interests. Non-personalised ads use contextual information such as the app and your coarse location, and still use
+          identifiers for frequency capping, reporting and fraud prevention. Which you receive depends on your consent and local law.
+        </p>
+        <p>
+          <strong>Your controls.</strong> On Android you can reset or delete your advertising ID, or opt out of ad personalisation,
+          in your phone&apos;s Settings → Privacy → Ads. This stops personalisation but does not stop ads being shown.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="consent" title="5. Consent (Google UMP)">
+        <p>
+          We manage advertising consent with Google&apos;s User Messaging Platform. Where consent is legally required (in particular in
+          the European Economic Area, the United Kingdom and Switzerland), the app shows a consent form before any ad is requested,
+          and stores your choice on your device. The app does not request ads until the consent flow allows it. You can change your
+          choice at any time in the app under Settings → Ad Privacy Settings. Consent covers Google and the partners listed in the
+          form, including Meta Audience Network where it is a partner for your region.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="services" title="6. Third-party services">
+        <ul>
+          <li>Google AdMob, including AdMob Mediation — advertising</li>
+          <li>Meta Audience Network — advertising, through AdMob Mediation</li>
+          <li>Firebase Authentication — the anonymous league account and its optional Play Games link</li>
+          <li>Cloud Firestore and Cloud Functions — Monthly League data, rewards and feedback</li>
+          <li>Google Analytics for Firebase — usage and engagement measurement</li>
+          <li>Firebase Crashlytics — crash and stability reports</li>
+          <li>Firebase Remote Config — remote feature settings</li>
+          <li>Google Play Games Services — optional sign-in, achievements, leaderboards and the league link</li>
+          <li>Google Play Services and Google Play — distribution, updates and in-app review prompts</li>
+        </ul>
+        <p>
+          Each service has its own privacy policy. Google&apos;s is at{" "}
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="sharing" title="7. How information is shared">
+        <p>We do not sell your personal information. We share information only:</p>
+        <ul>
+          <li>with other players, through the leaderboard described in section 2</li>
+          <li>with the service providers listed above, so they can perform their functions</li>
+          <li>where you have consented, or where the law that applies to you permits it</li>
+          <li>to comply with a legal obligation, court order or enforceable government request</li>
+          <li>to protect the rights, safety or property of our users, the public or us</li>
+        </ul>
+        <p>
+          Our providers operate worldwide, so information may be processed outside your country, including in the United States
+          and India. Where required, these transfers rely on safeguards such as the European Commission&apos;s standard contractual
+          clauses.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="retention" title="8. Data retention">
+        <ul>
+          <li>Data on your device stays until you clear the app&apos;s data or uninstall it.</li>
+          <li>League data (your league account, profile, daily results, monthly results, rewards and history) is kept while the league runs so that past months and rewards stay available, and is deleted when you ask us to.</li>
+          <li>Feedback is kept until it is no longer needed.</li>
+          <li>Analytics, crash reports and advertising data are kept by Google and our ad partners for the periods in their own policies and our settings.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection id="rights" title="9. Your rights">
+        <p>
+          Depending on where you live (for example under the GDPR and UK GDPR, or laws such as the CCPA/CPRA), you may have the right
+          to access, correct or delete your personal data, to restrict or object to processing (including profiling for
+          advertising), to receive your data in a portable form, to withdraw consent at any time, to opt out of the
+          &quot;sale&quot; or &quot;sharing&quot; of personal information for cross-context behavioural advertising, and to complain to your
+          data protection authority.
+        </p>
+        <p>
+          To use these rights, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. For league data, include your display
+          name and the month you played so we can find your record; we may ask for more information to confirm the data is yours.
+          You can change advertising consent yourself under Settings → Ad Privacy Settings in the app.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="children" title="10. Children">
+        <p>
+          The Service is not directed to children under 13, and we do not knowingly collect personal information from them. The
+          app is not part of Google Play&apos;s Designed for Families programme. If you believe a child has given us personal
+          information, contact us and we will delete it.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="security" title="11. Security">
+        <p>
+          Data is sent over encrypted connections (HTTPS/TLS). League data can only be changed by our server code; the app and
+          other players cannot change scores, ranks or rewards, and your private league data (your ad-free time, daily records
+          and league history) is readable only by you. No system is completely secure, so we cannot guarantee absolute security.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="website" title="12. This website">
+        <p>
+          This website is a static site hosted on Firebase Hosting. It does not use cookies, analytics or advertising, and it has
+          no login. Like any web server, the hosting provider processes your IP address and request details to deliver pages and
+          protect the service. The browser version of Sudoku (Play Online) saves your current game in your browser&apos;s local
+          storage only. The support form opens your own email app; nothing is sent from the site.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="changes" title="13. Changes">
+        <p>
+          We may update this policy. The new version will be posted on this page with a new date, and significant changes will be
+          highlighted in the app or on this website.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="contact" title="14. Contact">
+        <p>
+          Questions about privacy or this policy: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. See also our{" "}
+          <Link href="/terms/">Terms of Service</Link>.
+        </p>
+        <p>
+          {SITE.developer}, {ADDRESS_LINE}. Phone <a href={PHONE_HREF}>{SITE.phone}</a>.
+        </p>
+      </LegalSection>
+    </LegalPage>
   );
 }
